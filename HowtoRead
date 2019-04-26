@@ -1,0 +1,102 @@
+ABOUT KBUILD
+
+1. Start with top level Makefile. 
+    At line 17, set the first target(default target) to be _all.
+    At line 559, set target _all to depends on all. 
+    At line 595, initialize init-y, drivers-y, net-y, libs-y, core-y, virt-y. 
+    At line 611, set target all to depend on vmlinux (this is to be overriden by arch specific Makefile)
+    At line 628, include arch/$ARCH/Makefile at line 628. The arch specific Makefile does following.
+        At the beginning, set some arch specific variables
+        At line 234, initializes header-y, and update libs-y, core-y, drivers-?
+        At line 266, set target all to depend on bzImage, bzImage depend on vmlinux, and the command to
+            generate bzImage based on vmlinux (see arch/x86/Makefile:271 for details).  Here one import 
+            command is:
+            $(Q)$(MAKE) $(build)=$(boot) $(KBUILD_IMAGE)
+            This command run make -f scripts/Makefile.build obj=arch/x86/boot bzImage
+    At line 1027, set vmlinux to depend on scripts/link-vmlinux.sh, $(vmlinux-deps), etc. The command is link-vmlinux.
+    At line 1043, set targets in $(vmlinux-deps) to depend on $(vmlinux-dirs)
+    At line 1052, set targets in $(vmlinux-dirs) to depend on prepare. Here the command run for each dir in $(vmlinux-dirs) is:
+        $(Q)$(MAKE) $(build)=$@ need-builtin=1
+        This command run make -f scripts/Makefile.build obj=dir need-builtin=1. The Makefile.build does some
+        common init and include the Makefile in the dir (say init) and 
+
+
+2. So from above we can see the workhorse is scripts/Makefile.build. Briefly speaking, this Makefile runs
+    Makefiles in sub dirs and then compile files in obj dir. In detail:
+    At line 9, set the first target(default target) to be __build
+    At line 45, include obj/Kbuild or obj/Makefile if obj/Kbuild doesn't exist. Generally the Kbuild/Makefile
+        set some variables to be used by this general Makefile
+    At line 73, set target __build to depend on $(builtin-target) $(lib-target) $(extra-y)) $(subdir-ym) $(always)
+    At line 397, set target $(subdir-obj-y) to depend on $(subdir-ym)
+    At line 494, set the command of each target in $(subdir-ym) as:
+        $(Q)$(MAKE) $(build)=$@ need-builtin=$(if $(findstring $@,$(subdir-obj-y)),1)
+        So that each Makefile in subdir of obj will be run
+
+3. File arch/x86/boot/Makefile is included by scripts/Makefile.build when running command at arch/x86/Makefile:271
+    At line 80, set target bzImage to depend on setup.bin, vmlinux.bin
+    At line 85, set target vmlinux.bin to depend on arch/x86/compressed/vmlinux
+    At line 108, set target setup.bin to depend on setup.elf (built from files in arch/x86/boot/{header.S,....})
+    At line 111, set arch/x86/compressed/vmlinux to be generated with command:
+        $(Q)$(MAKE) $(build)=$(obj)/compressed $@
+        In file arch/x86/compressed/Makefile
+        At line 115, set target vmlinux to depend on arch/x86/compressed/{vmlinux.lds,head_64.,misc.o,piggy.o, etc} 
+        At line 157, set target piggy.S to depend on vmlinux.bin
+        At line 119, set vmlinux.bin to depend on *file* vmlinux
+4. The structure of the kernel image is as follows:
+    +------------------------------+--------------------------------------------+------------------------------------------------+
+    |           setup              |                    head                    |                   piggy (Compressed)           |
+    |(arch/x86/boot/header.S, etc) |(arch/x86/boot/compressed/head_64.S, etc)   |  vmlinux(arch/x86/kernel/head_64.S, etc)       |
+    |       Real mode code         |                                     Protected code (loaded at 1M)                           |
+    +------------------------------+--------------------------------------------+------------------------------------------------+
+    See https://developer.ibm.com/articles/l-linuxboot/ for boot process.
+    See document Documentation/x86/boot.txt for boot protocol
+5. So start reading kernel code from file arch/x86/boot/header.S. This should be read together with setup.ld
+6. arch/x86/boot/header.S contains two parts:
+    Code from line 51 to line 287 is the boot sector. This sector contains two information:
+    1. If it is built for EFI, it contains PE header so that EFI boot can load the kernel
+    2. If it is not built for EFI, it contains a small stub to print error message if it is loaded by a non-compatible loader
+    This part also contains some fields filled by build.c. These fields will be used by the second part.
+
+    Code from line 289 is the real entry point of the startup code. This file does some real mode init and
+    go to arch/x86/boot/compressed/head_64.S
+7. arch/x86/boot/compressed/head_64.S. This file should be read together with arch/x86/boot/compressed/vmlinux.lds.S.
+    Now %esi contains the boot_params. Start running at arch/x86/boot/compressed/head_64.S:48. It does some
+    64bit paging initialization, move itself to a configured place and decompress the piggy part and jump to
+    it (arch/x86/kernel/head_64.S:55)
+    The compressed kernel image (ZO), has been moved so that its position
+    is against the end of the buffer used to hold the uncompressed kernel
+    image (VO) and the execution environment (.bss, .brk), which makes sure
+    there is room to do the in-place decompression. (See header.S for the
+    calculations.)
+    
+                                |-----compressed kernel image------|
+                                V                                  V
+    0                       extract_offset                      +INIT_SIZE
+    |-----------|---------------|-------------------------|--------|
+                |               |                         |        |
+               VO__text      startup_32 of ZO          VO__end    ZO__end
+                 ^                                         ^
+                 |-------uncompressed kernel image---------|
+
+8. The real kernel is generated by linking the following.
+    init-y		:= init/
+    drivers-y	:= drivers/ sound/ firmware/
+    net-y		:= net/
+    libs-y		:= lib/
+    core-y		:= usr/
+    virt-y		:= virt/
+    -------------------------------------------
+    head-y := arch/x86/kernel/head_$(BITS).o
+    head-y += arch/x86/kernel/head$(BITS).o
+    head-y += arch/x86/kernel/ebda.o
+    head-y += arch/x86/kernel/platform-quirks.o
+
+    libs-y  += arch/x86/lib/
+
+    core-y += arch/x86/
+
+    ===========================================
+    vmlinux-deps := arch/$(SRCARCH)/kernel/vmlinux.lds      $(head-y) $(init-y)      $(core-y) $(libs-y2) $(drivers-y) $(net-y) $(virt-y))      $(libs-y1)
+9. The real kernel starts running at arch/x86/kernel/head_64.S:55. This should be read together with file 
+    arch/x86/kernel/vmlinux.lds.S. This file calls arch/x86/kernel/head64.c, which in turn calls start_kernel 
+    at init/main.c:537.
