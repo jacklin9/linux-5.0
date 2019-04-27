@@ -87,9 +87,9 @@ void initialize_identity_maps(void)
 	physical_mask &= ~sme_me_mask;
 
 	/* Init mapping_info with run-time function/buffer pointers. */
-	mapping_info.alloc_pgt_page = alloc_pgt_page;
-	mapping_info.context = &pgt_data;
-	mapping_info.page_flag = __PAGE_KERNEL_LARGE_EXEC | sme_me_mask;
+	mapping_info.alloc_pgt_page = alloc_pgt_page;	/// Function used to allocate a page from context (pgt_data)
+	mapping_info.context = &pgt_data;	/// pgt_data is the starting addr of available page pools
+	mapping_info.page_flag = __PAGE_KERNEL_LARGE_EXEC | sme_me_mask;	/// For PUD and PMD entries
 	mapping_info.kernpg_flag = _KERNPG_TABLE;
 
 	/*
@@ -111,7 +111,7 @@ void initialize_identity_maps(void)
 	 * cases. On 4-level paging it's equal to 'top_level_pgt'.
 	 */
 	top_level_pgt = read_cr3_pa();
-	if (p4d_offset((pgd_t *)top_level_pgt, 0) == (p4d_t *)_pgtable) {
+	if (p4d_offset((pgd_t *)top_level_pgt, 0) == (p4d_t *)_pgtable) {	/// The current page mapping uses _pgtable
 		debug_putstr("booted via startup_32()\n");
 		pgt_data.pgt_buf = _pgtable + BOOT_INIT_PGT_SIZE;
 		pgt_data.pgt_buf_size = BOOT_PGT_SIZE - BOOT_INIT_PGT_SIZE;

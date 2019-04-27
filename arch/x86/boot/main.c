@@ -64,6 +64,7 @@ static void copy_boot_params(void)
  */
 static void keyboard_init(void)
 {
+	/// See http://stanislavs.org/helppc/int_16-2.html
 	struct biosregs ireg, oreg;
 	initregs(&ireg);
 
@@ -119,7 +120,7 @@ static void init_heap(void)
 
 	if (boot_params.hdr.loadflags & CAN_USE_HEAP) {
 		asm("leal %P1(%%esp),%0"
-		    : "=r" (stack_end) : "i" (-STACK_SIZE));
+		    : "=r" (stack_end) : "i" (-STACK_SIZE));	/// Segments: text, data, bss, heap, stack
 
 		heap_end = (char *)
 			((size_t)boot_params.hdr.heap_end_ptr + 0x200);
@@ -162,7 +163,7 @@ void main(void)
 	keyboard_init();
 
 	/* Query Intel SpeedStep (IST) information */
-	query_ist();
+	query_ist();	/// Intel SeepStep is a dynamic CPU freq adjusting mechanism
 
 	/* Query APM information */
 #if defined(CONFIG_APM) || defined(CONFIG_APM_MODULE)
@@ -171,7 +172,7 @@ void main(void)
 
 	/* Query EDD information */
 #if defined(CONFIG_EDD) || defined(CONFIG_EDD_MODULE)
-	query_edd();
+	query_edd();	/// Enhanced Disk Driver
 #endif
 
 	/* Set the video mode */

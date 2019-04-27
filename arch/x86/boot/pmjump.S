@@ -24,12 +24,12 @@
  * void protected_mode_jump(u32 entrypoint, u32 bootparams);
  */
 GLOBAL(protected_mode_jump)
-	movl	%edx, %esi		# Pointer to boot_params table
+	movl	%edx, %esi		# Pointer to boot_params table	### esi contains the addr of bootparams
 
 	xorl	%ebx, %ebx
 	movw	%cs, %bx
-	shll	$4, %ebx
-	addl	%ebx, 2f
+	shll	$4, %ebx	/// ebx contains the start addr of CS segment
+	addl	%ebx, 2f	/// Relocate address stored in 2f
 	jmp	1f			# Short jump to serialize on 386/486
 1:
 
@@ -57,7 +57,7 @@ GLOBAL(in_pm32)
 	movl	%ecx, %ss
 	# The 32-bit code sets up its own stack, but this way we do have
 	# a valid stack if some debugging hack wants to use it.
-	addl	%ebx, %esp
+	addl	%ebx, %esp	
 
 	# Set up TR to make Intel VT happy
 	ltr	%di
@@ -73,5 +73,5 @@ GLOBAL(in_pm32)
 	# Set up LDTR to make Intel VT happy
 	lldt	%cx
 
-	jmpl	*%eax			# Jump to the 32-bit entrypoint
+	jmpl	*%eax			# Jump to the 32-bit entrypoint	### The dest addr is arch/x86/boot/compressed/head_64.S:48
 ENDPROC(in_pm32)

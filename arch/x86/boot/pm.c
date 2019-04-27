@@ -69,13 +69,13 @@ static void setup_gdt(void)
 	   being 8-byte unaligned.  Intel recommends 16 byte alignment. */
 	static const u64 boot_gdt[] __attribute__((aligned(16))) = {
 		/* CS: code, read/execute, 4 GB, base 0 */
-		[GDT_ENTRY_BOOT_CS] = GDT_ENTRY(0xc09b, 0, 0xfffff),
+		[GDT_ENTRY_BOOT_CS] = GDT_ENTRY(0xc09b, 0, 0xfffff),	/// CS segment: start from addr 0
 		/* DS: data, read/write, 4 GB, base 0 */
-		[GDT_ENTRY_BOOT_DS] = GDT_ENTRY(0xc093, 0, 0xfffff),
+		[GDT_ENTRY_BOOT_DS] = GDT_ENTRY(0xc093, 0, 0xfffff),	/// DS segment: start from addr 0
 		/* TSS: 32-bit tss, 104 bytes, base 4096 */
 		/* We only have a TSS here to keep Intel VT happy;
 		   we don't actually use it for anything. */
-		[GDT_ENTRY_BOOT_TSS] = GDT_ENTRY(0x0089, 4096, 103),
+		[GDT_ENTRY_BOOT_TSS] = GDT_ENTRY(0x0089, 4096, 103),	/// TSS segment: start from 4K
 	};
 	/* Xen HVM incorrectly stores a pointer to the gdt_ptr, instead
 	   of the gdt_ptr contents.  Thus, make it static so it will
@@ -119,8 +119,8 @@ void go_to_protected_mode(void)
 	mask_all_interrupts();
 
 	/* Actual transition to protected mode... */
-	setup_idt();
+	setup_idt();	/// Set up an empty IDT
 	setup_gdt();
-	protected_mode_jump(boot_params.hdr.code32_start,
-			    (u32)&boot_params + (ds() << 4));
+	protected_mode_jump(boot_params.hdr.code32_start,	/// code32_start is actually at arch/x86/boot/compressed/head_64.S:48
+			    (u32)&boot_params + (ds() << 4));	/// protected_mode_jump see arch/x86/boot/pmjump.S:26
 }

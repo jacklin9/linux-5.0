@@ -26,9 +26,9 @@ static void detect_memory_e820(void)
 
 	initregs(&ireg);
 	ireg.ax  = 0xe820;
-	ireg.cx  = sizeof(buf);
+	ireg.cx  = sizeof(buf);	/// Size of the struct
 	ireg.edx = SMAP;
-	ireg.di  = (size_t)&buf;
+	ireg.di  = (size_t)&buf;	/// Addr of the struct
 
 	/*
 	 * Note: at least one BIOS is known which assumes that the
@@ -91,7 +91,7 @@ static void detect_memory_e801(void)
 	if (oreg.ax > 15*1024) {
 		return;	/* Bogus! */
 	} else if (oreg.ax == 15*1024) {
-		boot_params.alt_mem_k = (oreg.bx << 6) + oreg.ax;
+		boot_params.alt_mem_k = (oreg.bx << 6) + oreg.ax;	/// Store the available mem size in KB into boot_params
 	} else {
 		/*
 		 * This ignores memory above 16MB if we have a memory
@@ -117,9 +117,9 @@ static void detect_memory_88(void)
 
 void detect_memory(void)
 {
-	detect_memory_e820();
+	detect_memory_e820();	/// Memory map is stored in boot_params.e820_table, which is a list of boot_e820_entry 
 
-	detect_memory_e801();
+	detect_memory_e801();	/// Store available mem size into boot_params.alt_mem_k
 
 	detect_memory_88();
 }

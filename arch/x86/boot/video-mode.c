@@ -30,7 +30,7 @@ int do_restore;		/* Screen contents changed during mode flip */
 int graphic_mode;	/* Graphic mode with linear frame buffer */
 
 /* Probe the video drivers and have them generate their mode lists. */
-void probe_cards(int unsafe)
+void probe_cards(int unsafe) /// First call: unsafe = 0
 {
 	struct card_info *card;
 	static u8 probed[2];
@@ -40,14 +40,14 @@ void probe_cards(int unsafe)
 
 	probed[unsafe] = 1;
 
-	for (card = video_cards; card < video_cards_end; card++) {
+	for (card = video_cards; card < video_cards_end; card++) { /// video_cards see arch/x86/realmode/rm/realmode.lds.S:71. Also see __videocard
 		if (card->unsafe == unsafe) {
 			if (card->probe)
 				card->nmodes = card->probe();
 			else
 				card->nmodes = 0;
 		}
-	}
+	}	/// This loop processes video_bios (skipped, because unsafe = 1), video_vesa, video_vga
 }
 
 /* Test if a mode is defined */

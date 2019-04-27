@@ -52,14 +52,14 @@ ENTRY(startup_32)
 	 * kernel(text+data+bss+brk) ramdisk, zero_page, command line
 	 * all need to be under the 4G limit.
 	 */
-	cld
+	cld	### Make sure cx increase
 	/*
 	 * Test KEEP_SEGMENTS flag to see if the bootloader is asking
 	 * us to not reload segments
 	 */
 	testb $KEEP_SEGMENTS, BP_loadflags(%esi)
 	jnz 1f
-
+	### KEEP_SEGMENTS is not set, so reload ds, es, and ss
 	cli
 	movl	$(__BOOT_DS), %eax
 	movl	%eax, %ds
@@ -75,14 +75,14 @@ ENTRY(startup_32)
  * data at 0x1e4 (defined as a scratch field) are used as the stack
  * for this calculation. Only 4 bytes are needed.
  */
-	leal	(BP_scratch+4)(%esi), %esp
+	leal	(BP_scratch+4)(%esi), %esp	### esi contains the addr of boot_params. Set up a temp stack to do the call-sub. Only 4 bytes needed
 	call	1f
 1:	popl	%ebp
-	subl	$1b, %ebp
+	subl	$1b, %ebp	### ebp contains phy addr - virtual addr (or equivalently, the phy addr of startup_32)
 
 /* setup a stack and make sure cpu supports long mode. */
 	movl	$boot_stack_end, %eax
-	addl	%ebp, %eax
+	addl	%ebp, %eax	### Do the relocation
 	movl	%eax, %esp
 
 	call	verify_cpu
@@ -100,21 +100,21 @@ ENTRY(startup_32)
 
 #ifdef CONFIG_RELOCATABLE
 	movl	%ebp, %ebx
-	movl	BP_kernel_alignment(%esi), %eax
+	movl	BP_kernel_alignment(%esi), %eax	### esi contains the phy addr of boot_params
 	decl	%eax
 	addl	%eax, %ebx
 	notl	%eax
-	andl	%eax, %ebx
-	cmpl	$LOAD_PHYSICAL_ADDR, %ebx
-	jge	1f
+	andl	%eax, %ebx	### Put the aligned addr of startup_32 to ebx
+	cmpl	$LOAD_PHYSICAL_ADDR, %ebx	### LOAD_PHYSICAL_ADDR is 16M
+	jge	1f	### if ebx is bigger than LOAD_PHYSICAL_ADDR
 #endif
 	movl	$LOAD_PHYSICAL_ADDR, %ebx
-1:
+1:	### ebx contains the new loading address to run the decompressing
 
 	/* Target address to relocate to for decompression */
-	movl	BP_init_size(%esi), %eax
-	subl	$_end, %eax
-	addl	%eax, %ebx
+	movl	BP_init_size(%esi), %eax	### esi contains phy addr of boot_params. init_size contains the size of the decompressed image
+	subl	$_end, %eax	### _end see arch/x86/boot/compressed/vmlinux.lds.S:75. eax contains the inflated size
+	addl	%eax, %ebx	# ebx contains the new loading addr to the decompressed image
 
 /*
  * Prepare for entering 64 bit mode
@@ -146,16 +146,16 @@ ENTRY(startup_32)
 1:
 
 	/* Initialize Page tables to 0 */
-	leal	pgtable(%ebx), %edi
+	leal	pgtable(%ebx), %edi	### pgtable see line 707
 	xorl	%eax, %eax
 	movl	$(BOOT_INIT_PGT_SIZE/4), %ecx
 	rep	stosl
 
-	/* Build Level 4 */
-	leal	pgtable + 0(%ebx), %edi
+	/* Build Level 4 */	/// The mapping is in the kernel (32 bit part and 64 bit part) at the new position
+	leal	pgtable + 0(%ebx), %edi	### pgtable is the top level pg dir
 	leal	0x1007 (%edi), %eax
 	movl	%eax, 0(%edi)
-	addl	%edx, 4(%edi)
+	addl	%edx, 4(%edi)	/// Set the page after pgtable page as the first entry of the top level pg dir
 
 	/* Build Level 3 */
 	leal	pgtable + 0x1000(%ebx), %edi
@@ -180,12 +180,12 @@ ENTRY(startup_32)
 	jnz	1b
 
 	/* Enable the boot page tables */
-	leal	pgtable(%ebx), %eax
-	movl	%eax, %cr3
+	leal	pgtable(%ebx), %eax	
+	movl	%eax, %cr3	### Although we are still running the code in the old position, we use the page mapping in the new position
 
 	/* Enable Long mode in EFER (Extended Feature Enable Register) */
-	movl	$MSR_EFER, %ecx
-	rdmsr
+	movl	$MSR_EFER, %ecx	### Target register id is in ecx
+	rdmsr	### Read result is in eax
 	btsl	$_EFER_LME, %eax
 	wrmsr
 
@@ -221,7 +221,7 @@ ENTRY(startup_32)
 	movl	%eax, %cr0
 
 	/* Jump from 32bit compatibility mode into 64bit mode. */
-	lret
+	lret	### Jump to startup_64 at line 253, but still running with old addr
 ENDPROC(startup_32)
 
 #ifdef CONFIG_EFI_MIXED
@@ -285,8 +285,10 @@ ENTRY(startup_64)
 
 	/* Start with the delta to where the kernel will run at. */
 #ifdef CONFIG_RELOCATABLE
-	leaq	startup_32(%rip) /* - $startup_32 */, %rbp
-	movl	BP_kernel_alignment(%rsi), %eax
+	leaq	startup_32(%rip) /* - $startup_32 */, %rbp	### This instruction uses rip relative addressing, in which vaddr(label) - vaddr(current)
+														### is stored in current instruction, when dong lea, the value 
+														### eip + vaddr(label) - vaddr(current) is returned, which is the real addr of the label
+	movl	BP_kernel_alignment(%rsi), %eax	### rsi contains the addr of boot_params
 	decl	%eax
 	addq	%rax, %rbp
 	notq	%rax
@@ -294,16 +296,18 @@ ENTRY(startup_64)
 	cmpq	$LOAD_PHYSICAL_ADDR, %rbp
 	jge	1f
 #endif
-	movq	$LOAD_PHYSICAL_ADDR, %rbp
+	movq	$LOAD_PHYSICAL_ADDR, %rbp	### Put max(load addr of startup_32, LOAD_PHYSICAL_ADDR) to rbp. LOAD_PHYSICAL_ADDR is 16M
 1:
 
 	/* Target address to relocate to for decompression */
-	movl	BP_init_size(%rsi), %ebx
-	subl	$_end, %ebx
-	addq	%rbp, %rbx
+	movl	BP_init_size(%rsi), %ebx	### The size of decompressed kernel
+	subl	$_end, %ebx	### rbx contains the addr of decompressed kernel
+	addq	%rbp, %rbx	### The buffer used for decompressing starts at ebp, ends at ebp + init_size. This is enough for in place decomressing.
+						### For in place decompressing, we move the kernel (32 bit + compressed image) to the end of buf. So the moved kernel
+						### starts at ebp + init_size - _end. This value is stored in rbx
 
 	/* Set up the stack */
-	leaq	boot_stack_end(%rbx), %rsp
+	leaq	boot_stack_end(%rbx), %rsp	### Use the stack in the new kernel position
 
 	/*
 	 * paging_prepare() and cleanup_trampoline() below can have GOT
@@ -312,7 +316,7 @@ ENTRY(startup_64)
 	 * Zero RAX for adjust_got: the GOT was not adjusted before;
 	 * there's no adjustment to undo.
 	 */
-	xorq	%rax, %rax
+	xorq	%rax, %rax	### No previous GOT adjustment done before, so no need to undo it
 
 	/*
 	 * Calculate the address the binary is loaded at and use it as
@@ -320,9 +324,9 @@ ENTRY(startup_64)
 	 */
 	call	1f
 1:	popq	%rdi
-	subq	$1b, %rdi
+	subq	$1b, %rdi	### rdi contains load_addr - vaddr
 
-	call	adjust_got
+	call	adjust_got	### rax contains the previous adjustment, rdi contains the current adjustment
 
 	/*
 	 * At this point we are in long mode with 4-level paging enabled,
@@ -348,9 +352,10 @@ ENTRY(startup_64)
 	 * already in a desired paging mode. This way the trampoline code gets
 	 * tested on every boot.
 	 */
+	### Trampoline is a piece of code to running in 32-bit mode to change long mode settings
 
 	/* Make sure we have GDT with 32-bit code segment */
-	leaq	gdt(%rip), %rax
+	leaq	gdt(%rip), %rax	### gdt see line 664
 	movq	%rax, gdt64+2(%rip)
 	lgdt	gdt64(%rip)
 
@@ -366,7 +371,8 @@ ENTRY(startup_64)
 	 */
 	pushq	%rsi
 	movq	%rsi, %rdi		/* real mode address */
-	call	paging_prepare
+	call	paging_prepare	### Because the C code is compiled PIC and GOT is already adjusted, C function can be called. This function
+							### checks if 5level is needed, find a mem region for the trampoline code, copy the code to the mem region
 	popq	%rsi
 
 	/* Save the trampoline address in RCX */
@@ -380,12 +386,12 @@ ENTRY(startup_64)
 
 	/* Switch to compatibility mode (CS.L = 0 CS.D = 1) via far return */
 	pushq	$__KERNEL32_CS
-	leaq	TRAMPOLINE_32BIT_CODE_OFFSET(%rax), %rax
+	leaq	TRAMPOLINE_32BIT_CODE_OFFSET(%rax), %rax	### rax contains the starting addr of trampoline code, i.e. trampoline_32bit_src.
 	pushq	%rax
 	lretq
 trampoline_return:
 	/* Restore the stack, the 32-bit trampoline uses its own stack */
-	leaq	boot_stack_end(%rbx), %rsp
+	leaq	boot_stack_end(%rbx), %rsp	### Use the stack in the new kenrel position
 
 	/*
 	 * cleanup_trampoline() would restore trampoline memory.
@@ -396,7 +402,7 @@ trampoline_return:
 	 * RSI holds real mode data and needs to be preserved across
 	 * this function call.
 	 */
-	pushq	%rsi
+	pushq	%rsi	### rsi is the addr of boot_params
 	leaq	top_pgtable(%rbx), %rdi
 	call	cleanup_trampoline
 	popq	%rsi
@@ -418,15 +424,15 @@ trampoline_return:
 
 	/* The new adjustment is the relocation address */
 	movq	%rbx, %rdi
-	call	adjust_got
+	call	adjust_got	### Adjust GOT to get ready to jump to the new kernel position
 
 /*
  * Copy the compressed kernel to the end of our buffer
  * where decompression in place becomes safe.
  */
 	pushq	%rsi
-	leaq	(_bss-8)(%rip), %rsi
-	leaq	(_bss-8)(%rbx), %rdi
+	leaq	(_bss-8)(%rip), %rsi	### rsi contains the end addr of the current kernel positon
+	leaq	(_bss-8)(%rbx), %rdi	### rdi contains the end addr of the new kernel position for in place decompression
 	movq	$_bss /* - $startup_32 */, %rcx
 	shrq	$3, %rcx
 	std
@@ -438,7 +444,7 @@ trampoline_return:
  * Jump to the relocated address.
  */
 	leaq	relocated(%rbx), %rax
-	jmp	*%rax
+	jmp	*%rax	### Jump to relocated in the new kernel position. See line 515
 
 #ifdef CONFIG_EFI_STUB
 
@@ -526,12 +532,12 @@ relocated:
 	pushq	%rsi			/* Save the real mode argument */
 	movq	%rsi, %rdi		/* real mode address */
 	leaq	boot_heap(%rip), %rsi	/* malloc area for uncompression */
-	leaq	input_data(%rip), %rdx  /* input_data */
+	leaq	input_data(%rip), %rdx  /* input_data */ ### input_data see arch/x86/boot/compressed/mkpiggy.c:73
 	movl	$z_input_len, %ecx	/* input_len */
 	movq	%rbp, %r8		/* output target address */
 	movq	$z_output_len, %r9	/* decompressed length, end of relocs */
-	call	extract_kernel		/* returns kernel location in %rax */
-	popq	%rsi
+	call	extract_kernel		/* returns kernel location in %rax */	### Decompress kernel, parse the ELF, and copy segments to their dest
+	popq	%rsi	### Jump to arch/x86/kernel/head_64.S startup_64
 
 /*
  * Jump to the decompressed kernel.
@@ -547,7 +553,7 @@ relocated:
  */
 adjust_got:
 	/* Walk through the GOT adding the address to the entries */
-	leaq	_got(%rip), %rdx
+	leaq	_got(%rip), %rdx	### Now rdx contains the real addr of _got
 	leaq	_egot(%rip), %rcx
 1:
 	cmpq	%rcx, %rdx
@@ -629,12 +635,12 @@ ENTRY(trampoline_32bit_src)
 	movl	$(X86_CR0_PG | X86_CR0_PE), %eax
 	movl	%eax, %cr0
 
-	lret
+	lret	### Jump to paging_enabled
 
 	.code64
 paging_enabled:
 	/* Return from the trampoline */
-	jmp	*%rdi
+	jmp	*%rdi	### rdi contains addr of trampoline_return
 
 	/*
          * The trampoline code has a size limit.

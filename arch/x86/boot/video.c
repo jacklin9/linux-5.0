@@ -82,11 +82,11 @@ static void store_mode_params(void)
 	}
 
 	set_fs(0);
-	font_size = rdfs16(0x485); /* Font size, BIOS area */
+	font_size = rdfs16(0x485); /* Font size, BIOS area */	/// Read phy addr 0x485 to get font size
 	boot_params.screen_info.orig_video_points = font_size;
 
-	x = rdfs16(0x44a);
-	y = (adapter == ADAPTER_CGA) ? 25 : rdfs8(0x484)+1;
+	x = rdfs16(0x44a);	/// Column number
+	y = (adapter == ADAPTER_CGA) ? 25 : rdfs8(0x484)+1;	/// Row number
 
 	if (force_x)
 		x = force_x;

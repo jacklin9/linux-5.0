@@ -177,7 +177,7 @@ static void handle_relocations(void *output, unsigned long output_len,
 	int *reloc;
 	unsigned long delta, map, ptr;
 	unsigned long min_addr = (unsigned long)output;
-	unsigned long max_addr = min_addr + (VO___bss_start - VO__text);
+	unsigned long max_addr = min_addr + (VO___bss_start - VO__text);	/// min_addr and max_addr are the range of phy addr of decompressed kernel
 
 	/*
 	 * Calculate the delta between where vmlinux was linked to load
@@ -324,7 +324,7 @@ static void parse_elf(void *output)
  * is against the end of the buffer used to hold the uncompressed kernel
  * image (VO) and the execution environment (.bss, .brk), which makes sure
  * there is room to do the in-place decompression. (See header.S for the
- * calculations.)
+ * calculations.) !!! See arch/x86/boot/header.S:443
  *
  *                             |-----compressed kernel image------|
  *                             V                                  V
@@ -349,7 +349,7 @@ asmlinkage __visible void *extract_kernel(void *rmode, memptr heap,
 	boot_params = rmode;
 
 	/* Clear flags intended for solely in-kernel use. */
-	boot_params->hdr.loadflags &= ~KASLR_FLAG;
+	boot_params->hdr.loadflags &= ~KASLR_FLAG; /// Address Space Layout Randomization
 
 	sanitize_boot_params(boot_params);
 
@@ -390,7 +390,7 @@ asmlinkage __visible void *extract_kernel(void *rmode, memptr heap,
 	choose_random_location((unsigned long)input_data, input_len,
 				(unsigned long *)&output,
 				max(output_len, kernel_total_size),
-				&virt_addr);
+				&virt_addr);	/// Both output and virt_addr are randomized
 
 	/* Validate memory location choices. */
 	if ((unsigned long)output & (MIN_KERNEL_ALIGN - 1))

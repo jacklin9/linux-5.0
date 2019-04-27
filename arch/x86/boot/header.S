@@ -85,7 +85,7 @@ bs_die:
 	#
 	# Offset to the PE header.
 	#
-	.long	pe_header
+	.long	pe_header	### MZ header contains a field telling the offset to the PE header
 #endif /* CONFIG_EFI_STUB */
 
 	.section ".bsdata", "a"
@@ -596,6 +596,7 @@ start_of_setup:
 
 # We will have entered with %cs = %ds+0x20, normalize %cs so
 # it is on par with the other segments.
+### The loader uses jmp %ds + 0x20:0 to go to setup. Can this normalization be done earlier?
 	pushw	%ds
 	pushw	$6f
 	lretw

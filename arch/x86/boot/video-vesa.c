@@ -43,7 +43,7 @@ static int vesa_probe(void)
 	initregs(&ireg);
 	ireg.ax = 0x4f00;
 	ireg.di = (size_t)&vginfo;
-	intcall(0x10, &ireg, &oreg);
+	intcall(0x10, &ireg, &oreg); /// Get vesa info and store to vginfo
 
 	if (oreg.ax != 0x004f ||
 	    vginfo.signature != VESA_MAGIC ||
@@ -53,7 +53,7 @@ static int vesa_probe(void)
 	set_fs(vginfo.video_mode_ptr.seg);
 	mode_ptr = vginfo.video_mode_ptr.off;
 
-	while ((mode = rdfs16(mode_ptr)) != 0xffff) {
+	while ((mode = rdfs16(mode_ptr)) != 0xffff) {	/// Get all supported modes
 		mode_ptr += 2;
 
 		if (!heap_free(sizeof(struct mode_info)))
@@ -67,7 +67,7 @@ static int vesa_probe(void)
 		ireg.ax = 0x4f01;
 		ireg.cx = mode;
 		ireg.di = (size_t)&vminfo;
-		intcall(0x10, &ireg, &oreg);
+		intcall(0x10, &ireg, &oreg);	/// Get detailed information of the mod and store the result to vminfo
 
 		if (oreg.ax != 0x004f)
 			continue;

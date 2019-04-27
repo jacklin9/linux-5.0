@@ -235,7 +235,7 @@ static int vga_probe(void)
 	static const char *card_name[] = {
 		"CGA/MDA/HGC", "EGA", "VGA"
 	};
-	static struct mode_info *mode_lists[] = {
+	static struct mode_info *mode_lists[] = {	/// An array of mode list. cga_modes, ega_modes, and vga_modes are mode list
 		cga_modes,
 		ega_modes,
 		vga_modes,

@@ -21,7 +21,7 @@ struct paging_config {
 };
 
 /* Buffer to preserve trampoline memory */
-static char trampoline_save[TRAMPOLINE_32BIT_SIZE];
+static char trampoline_save[TRAMPOLINE_32BIT_SIZE]; /// The original content backup of the mem region occupied by the trampoline code
 
 /*
  * Trampoline address will be printed by extract_kernel() for debugging
@@ -126,7 +126,7 @@ struct paging_config paging_prepare(void *rmode)
 
 	/* Copy trampoline code in place */
 	memcpy(trampoline_32bit + TRAMPOLINE_32BIT_CODE_OFFSET / sizeof(unsigned long),
-			&trampoline_32bit_src, TRAMPOLINE_32BIT_CODE_SIZE);
+			&trampoline_32bit_src, TRAMPOLINE_32BIT_CODE_SIZE);	/// trampoline_32bit_src is the starting addr of the 32bit trampoline
 
 	/*
 	 * The code below prepares page table in trampoline memory.

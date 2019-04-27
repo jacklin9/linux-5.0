@@ -84,7 +84,7 @@ startup_64:
 	 * is active) to be added to the initial pgdir entry that will be
 	 * programmed into CR3.
 	 */
-	leaq	_text(%rip), %rdi
+	leaq	_text(%rip), %rdi	### rdi contains the starting addr of _test segment
 	pushq	%rsi
 	call	__startup_64
 	popq	%rsi
@@ -140,7 +140,7 @@ ENTRY(secondary_startup_64)
 	/* Ensure I am executing from virtual addresses */
 	movq	$1f, %rax
 	ANNOTATE_RETPOLINE_SAFE
-	jmp	*%rax
+	jmp	*%rax	### From here we are executing from virtual addresses
 1:
 	UNWIND_HINT_EMPTY
 
@@ -237,7 +237,7 @@ ENTRY(secondary_startup_64)
 	 */
 	pushq	$.Lafter_lret	# put return address on stack for unwinder
 	xorl	%ebp, %ebp	# clear frame pointer
-	movq	initial_code(%rip), %rax
+	movq	initial_code(%rip), %rax	### initial_code see line 265
 	pushq	$__KERNEL_CS	# set correct cs
 	pushq	%rax		# target address in negative space
 	lretq
