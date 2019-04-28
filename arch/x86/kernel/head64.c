@@ -79,7 +79,7 @@ static unsigned int __head *fixup_int(void *ptr, unsigned long physaddr)
 	return fixup_pointer(ptr, physaddr);
 }
 
-static bool __head check_la57_support(unsigned long physaddr)
+static bool __head check_la57_support(unsigned long physaddr)	/// physaddr is the starting physical addr of kernel
 {
 	/*
 	 * 5-level paging is detected and enabled at kernel decomression
@@ -87,7 +87,7 @@ static bool __head check_la57_support(unsigned long physaddr)
 	 */
 	if (!(native_read_cr4() & X86_CR4_LA57))
 		return false;
-
+	/// Initialize some variables
 	*fixup_int(&__pgtable_l5_enabled, physaddr) = 1;
 	*fixup_int(&pgdir_shift, physaddr) = 48;
 	*fixup_int(&ptrs_per_p4d, physaddr) = 512;
@@ -125,7 +125,7 @@ unsigned long __head __startup_64(unsigned long physaddr,
 	int i;
 	unsigned int *next_pgt_ptr;
 
-	la57 = check_la57_support(physaddr);
+	la57 = check_la57_support(physaddr);	/// Check if LA57 is enabled and initialize some variables
 
 	/* Is the address too large? */
 	if (physaddr >> MAX_PHYSMEM_BITS)
@@ -135,11 +135,23 @@ unsigned long __head __startup_64(unsigned long physaddr,
 	 * Compute the delta between the address I am compiled to run at
 	 * and the address I am actually running at.
 	 */
-	load_delta = physaddr - (unsigned long)(_text - __START_KERNEL_map);
+	load_delta = physaddr - (unsigned long)(_text - __START_KERNEL_map);	/// load_delta is the physical addr that starts mem mapping
+	///                           Physical map
+	///       +--------------+----------------------------------------------------+
+	///       |                    |                                              |
+	///    load_delta           physaddr                                          |
+	///       |                    |                                              |
+	///       +--------------------+ ---------------------------------------------+
+	///                           Virtual map
+	///       +--------------+----------------------------------------------------+
+	///       |                    |                                              |
+	///    START_KERNL_map       _text                                            |
+	///       |                    |                                              |
+	///       +--------------------+ ---------------------------------------------+
 
 	/* Is the address not 2M aligned? */
-	if (load_delta & ~PMD_PAGE_MASK)
-		for (;;);
+	if (load_delta & ~PMD_PAGE_MASK)	/// 5 levels can map 57bit virtual address: PML5(9),PML4(9),PUD(9),PMD(9),PTE(9),offset(12)
+		for (;;);						/// 4 levels: PGD(9), PUD(9), PMD(9), PTE(9), offset(12)
 
 	/* Activate Secure Memory Encryption (SME) if supported and enabled */
 	sme_enable(bp);

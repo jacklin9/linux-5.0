@@ -113,7 +113,7 @@ SECTIONS
 	. = LOAD_OFFSET + LOAD_PHYSICAL_ADDR;
 	phys_startup_32 = ABSOLUTE(startup_32 - LOAD_OFFSET);
 #else
-	. = __START_KERNEL;
+	. = __START_KERNEL;	/// At very high virt addr
 	phys_startup_64 = ABSOLUTE(startup_64 - LOAD_OFFSET);
 #endif
 
