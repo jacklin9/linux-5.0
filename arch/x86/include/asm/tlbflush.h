@@ -277,7 +277,7 @@ static inline bool nmi_uaccess_okay(void)
 /* Initialize cr4 shadow for this CPU. */
 static inline void cr4_init_shadow(void)
 {
-	this_cpu_write(cpu_tlbstate.cr4, __read_cr4());
+	this_cpu_write(cpu_tlbstate.cr4, __read_cr4()); /// this_cpu_write_4. Write the current cr4 val to the per cpu var
 }
 
 static inline void __cr4_set(unsigned long cr4)

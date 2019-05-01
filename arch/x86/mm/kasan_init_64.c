@@ -264,8 +264,8 @@ void __init kasan_early_init(void)
 {
 	int i;
 	pteval_t pte_val = __pa_nodebug(kasan_early_shadow_page) |
-				__PAGE_KERNEL | _PAGE_ENC;
-	pmdval_t pmd_val = __pa_nodebug(kasan_early_shadow_pte) | _KERNPG_TABLE;
+				__PAGE_KERNEL | _PAGE_ENC;	/// Physical addr of kasan_early_shadow_page
+	pmdval_t pmd_val = __pa_nodebug(kasan_early_shadow_pte) | _KERNPG_TABLE;	/// kasan_early_shaow_pte is a page
 	pudval_t pud_val = __pa_nodebug(kasan_early_shadow_pmd) | _KERNPG_TABLE;
 	p4dval_t p4d_val = __pa_nodebug(kasan_early_shadow_pud) | _KERNPG_TABLE;
 
@@ -276,16 +276,16 @@ void __init kasan_early_init(void)
 	p4d_val &= __default_kernel_pte_mask;
 
 	for (i = 0; i < PTRS_PER_PTE; i++)
-		kasan_early_shadow_pte[i] = __pte(pte_val);
+		kasan_early_shadow_pte[i] = __pte(pte_val); /// All pointers in kasan_early_shadow_pte point to kasan_early_shadow_page
 
 	for (i = 0; i < PTRS_PER_PMD; i++)
-		kasan_early_shadow_pmd[i] = __pmd(pmd_val);
+		kasan_early_shadow_pmd[i] = __pmd(pmd_val);	/// All pointers in kasan_early_shadow_pmd point to kasan_early_shadow_pte
 
 	for (i = 0; i < PTRS_PER_PUD; i++)
-		kasan_early_shadow_pud[i] = __pud(pud_val);
+		kasan_early_shadow_pud[i] = __pud(pud_val);	/// All pointers in kasan_early_shadow_pud point to kasan_early_shadow_pmd
 
 	for (i = 0; pgtable_l5_enabled() && i < PTRS_PER_P4D; i++)
-		kasan_early_shadow_p4d[i] = __p4d(p4d_val);
+		kasan_early_shadow_p4d[i] = __p4d(p4d_val);	/// All pointers in kasan_early_shadow_p4d point to kasan_early_shadow_pud
 
 	kasan_map_early_shadow(early_top_pgt);
 	kasan_map_early_shadow(init_top_pgt);

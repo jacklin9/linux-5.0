@@ -86,7 +86,7 @@ startup_64:
 	 */
 	leaq	_text(%rip), %rdi	### rdi contains the starting addr of _text segment
 	pushq	%rsi
-	call	__startup_64
+	call	__startup_64	### Setup virtual addr mapping as temp identity mapping, enable encryption
 	popq	%rsi
 
 	/* Form the CR3 value being sure to include the CR3 modifier */
@@ -134,7 +134,7 @@ ENTRY(secondary_startup_64)
 	movq	%rcx, %cr4
 
 	/* Setup early boot stage 4-/5-level pagetables. */
-	addq	phys_base(%rip), %rax
+	addq	phys_base(%rip), %rax	### Use the newly setup mapping
 	movq	%rax, %cr3
 
 	/* Ensure I am executing from virtual addresses */
@@ -240,7 +240,7 @@ ENTRY(secondary_startup_64)
 	movq	initial_code(%rip), %rax	### initial_code see line 265
 	pushq	$__KERNEL_CS	# set correct cs
 	pushq	%rax		# target address in negative space
-	lretq
+	lretq	### Jump to x86_64_start_kernel actually
 .Lafter_lret:
 END(secondary_startup_64)
 

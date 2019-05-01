@@ -665,7 +665,7 @@ static struct microcode_intel *__load_ucode_intel(struct ucode_cpu_info *uci)
 		path	  = (const char *)__pa_nodebug(ucode_path);
 		use_pa	  = true;
 	} else {
-		path	  = ucode_path;
+		path	  = ucode_path; /// The path of the micro code file in initrd
 		use_pa	  = false;
 	}
 
