@@ -5281,7 +5281,7 @@ static void __init cgroup_init_subsys(struct cgroup_subsys *ss, bool early)
 
 	mutex_lock(&cgroup_mutex);
 
-	idr_init(&ss->css_idr);
+	idr_init(&ss->css_idr);	/// IDR is ID management mechanism in kernel. Initialize IDE of the subsystem
 	INIT_LIST_HEAD(&ss->cfts);
 
 	/* Create the root cgroup state for this subsystem */
@@ -5338,12 +5338,12 @@ int __init cgroup_init_early(void)
 	struct cgroup_subsys *ss;
 	int i;
 
-	init_cgroup_root(&cgrp_dfl_root, &opts);
+	init_cgroup_root(&cgrp_dfl_root, &opts);	/// cgrp_dfl_root is the default cgroup root
 	cgrp_dfl_root.cgrp.self.flags |= CSS_NO_REF;
 
-	RCU_INIT_POINTER(init_task.cgroups, &init_css_set);
+	RCU_INIT_POINTER(init_task.cgroups, &init_css_set);	/// Set init_task's cgroup
 
-	for_each_subsys(ss, i) {
+	for_each_subsys(ss, i) {	/// For each element in cgroup_subsys
 		WARN(!ss->css_alloc || !ss->css_free || ss->name || ss->id,
 		     "invalid cgroup_subsys %d:%s css_alloc=%p css_free=%p id:name=%d:%s\n",
 		     i, cgroup_subsys_name[i], ss->css_alloc, ss->css_free,

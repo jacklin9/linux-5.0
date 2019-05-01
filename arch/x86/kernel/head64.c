@@ -433,7 +433,7 @@ asmlinkage __visible void __init x86_64_start_kernel(char * real_mode_data)
 				(__START_KERNEL & PGDIR_MASK)));
 	BUILD_BUG_ON(__fix_to_virt(__end_of_fixed_addresses) <= MODULES_END);
 
-	cr4_init_shadow();
+	cr4_init_shadow();	/// Write CR4 content to per CPU storage
 
 	/* Kill off the identity-map trampoline */
 	reset_early_page_tables(); /// Clean up the temp identity mapping and free up the dynamic page for mapping

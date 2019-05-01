@@ -504,7 +504,7 @@ do {									\
  * Operations with implied preemption/interrupt protection.  These
  * operations can be used without worrying about preemption or interrupt.
  */
-#define this_cpu_read(pcp)		__pcpu_size_call_return(this_cpu_read_, pcp)
+#define this_cpu_read(pcp)		__pcpu_size_call_return(this_cpu_read_, pcp)	/// this_cpu_read_4
 #define this_cpu_write(pcp, val)	__pcpu_size_call(this_cpu_write_, pcp, val)
 #define this_cpu_add(pcp, val)		__pcpu_size_call(this_cpu_add_, pcp, val)
 #define this_cpu_and(pcp, val)		__pcpu_size_call(this_cpu_and_, pcp, val)

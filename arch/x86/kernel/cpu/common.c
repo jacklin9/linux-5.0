@@ -1141,12 +1141,12 @@ void __init early_cpu_init(void)
 	pr_info("KERNEL supported cpus:\n");
 #endif
 
-	for (cdev = __x86_cpu_dev_start; cdev < __x86_cpu_dev_end; cdev++) {
-		const struct cpu_dev *cpudev = *cdev;
+	for (cdev = __x86_cpu_dev_start; cdev < __x86_cpu_dev_end; cdev++) {	/// Defined by macro cpu_dev_register
+		const struct cpu_dev *cpudev = *cdev;								/// adm_cpu_dev, intel_cpu_dev
 
 		if (count >= X86_VENDOR_NUM)
 			break;
-		cpu_devs[count] = cpudev;
+		cpu_devs[count] = cpudev;	/// Collect all cpu info to cpu_devs array
 		count++;
 
 #ifdef CONFIG_PROCESSOR_SELECT

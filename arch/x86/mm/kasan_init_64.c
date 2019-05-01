@@ -287,8 +287,8 @@ void __init kasan_early_init(void)
 	for (i = 0; pgtable_l5_enabled() && i < PTRS_PER_P4D; i++)
 		kasan_early_shadow_p4d[i] = __p4d(p4d_val);	/// All pointers in kasan_early_shadow_p4d point to kasan_early_shadow_pud
 
-	kasan_map_early_shadow(early_top_pgt);
-	kasan_map_early_shadow(init_top_pgt);
+	kasan_map_early_shadow(early_top_pgt);	/// Add the shadow page mapping to early_top_pgt
+	kasan_map_early_shadow(init_top_pgt);	/// Add the shadow page mapping to init_top_pgt
 }
 
 void __init kasan_init(void)
