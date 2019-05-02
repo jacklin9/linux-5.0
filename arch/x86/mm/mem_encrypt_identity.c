@@ -267,7 +267,8 @@ static unsigned long __init sme_pgtable_calc(unsigned long len)
 	return entries + tables;
 }
 
-void __init sme_encrypt_kernel(struct boot_params *bp)
+void __init sme_encrypt_kernel(struct boot_params *bp)	/// Encryption is done by enabling the enc flag and copy data there (encryption is done
+														/// by CPU automatically)
 {
 	unsigned long workarea_start, workarea_end, workarea_len;
 	unsigned long execute_start, execute_end, execute_len;
@@ -327,7 +328,7 @@ void __init sme_encrypt_kernel(struct boot_params *bp)
 	 *   pagetable structures for workarea (in case not currently mapped)
 	 */
 	execute_start = workarea_start;
-	execute_end = execute_start + (PAGE_SIZE * 2) + PMD_PAGE_SIZE;
+	execute_end = execute_start + (PAGE_SIZE * 2) + PMD_PAGE_SIZE;	/// PMD_PAGE_SIZE is 2M
 	execute_len = execute_end - execute_start;
 
 	/*
@@ -439,7 +440,7 @@ void __init sme_encrypt_kernel(struct boot_params *bp)
 
 	/* Perform the encryption */
 	sme_encrypt_execute(kernel_start, kernel_start + decrypted_base,
-			    kernel_len, workarea_start, (unsigned long)ppd.pgd);
+			    kernel_len, workarea_start, (unsigned long)ppd.pgd);	/// Do the content encryption
 
 	if (initrd_len)
 		sme_encrypt_execute(initrd_start, initrd_start + decrypted_base,
@@ -486,8 +487,8 @@ void __init sme_enable(struct boot_params *bp)
 	if (eax < 0x8000001f)
 		return;
 
-#define AMD_SME_BIT	BIT(0)
-#define AMD_SEV_BIT	BIT(1)
+#define AMD_SME_BIT	BIT(0)	/// SME: Secure Memory Encryption
+#define AMD_SEV_BIT	BIT(1)	/// SEV: Secure Encrypted Vitualization
 	/*
 	 * Set the feature mask (SME or SEV) based on whether we are
 	 * running under a hypervisor.
@@ -495,7 +496,8 @@ void __init sme_enable(struct boot_params *bp)
 	eax = 1;
 	ecx = 0;
 	native_cpuid(&eax, &ebx, &ecx, &edx);
-	feature_mask = (ecx & BIT(31)) ? AMD_SEV_BIT : AMD_SME_BIT;
+	feature_mask = (ecx & BIT(31)) ? AMD_SEV_BIT : AMD_SME_BIT;	/// If running in host machine, use SME; otherwise, use SEV (to make sure
+																/// different VM's have different encryption keys)
 
 	/*
 	 * Check for the SME/SEV feature:
@@ -564,5 +566,5 @@ void __init sme_enable(struct boot_params *bp)
 	else
 		sme_me_mask = active_by_default ? me_mask : 0;
 
-	physical_mask &= ~sme_me_mask;
+	physical_mask &= ~sme_me_mask;	/// sme_me_mask is the bit position of encrpytion flag
 }

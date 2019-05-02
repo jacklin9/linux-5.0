@@ -417,7 +417,7 @@ asmlinkage __visible void *extract_kernel(void *rmode, memptr heap,
 	__decompress(input_data, input_len, NULL, NULL, output, output_len,
 			NULL, error);
 	parse_elf(output);
-	handle_relocations(output, output_len, virt_addr);
+	handle_relocations(output, output_len, virt_addr);	/// Do the relocation so the kernel can run
 	debug_putstr("done.\nBooting the kernel.\n");
 	return output;
 }

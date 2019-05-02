@@ -74,6 +74,8 @@ startup_64:
 
 	/* Set up the stack for verify_cpu(), similar to initial_stack below */
 	leaq	(__end_init_task - SIZEOF_PTREGS)(%rip), %rsp	### Use IP relative relocation to find real addr
+															### __end_init_task is the end addr of init task
+															### SIZEOF_PTREGS is the size of call stack frame size of trap/syscall
 
 	/* Sanitize CPU configuration */
 	call verify_cpu
@@ -86,7 +88,7 @@ startup_64:
 	 */
 	leaq	_text(%rip), %rdi	### rdi contains the starting addr of _text segment
 	pushq	%rsi
-	call	__startup_64
+	call	__startup_64	### Setup page mapping and do kernel encryption
 	popq	%rsi
 
 	/* Form the CR3 value being sure to include the CR3 modifier */
@@ -144,7 +146,7 @@ ENTRY(secondary_startup_64)
 1:
 	UNWIND_HINT_EMPTY
 
-	/* Check if nx is implemented */
+	/* Check if nx is implemented */	### NX flag: does the CPU support page level Non-Exec
 	movl	$0x80000001, %eax
 	cpuid
 	movl	%edx,%edi

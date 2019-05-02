@@ -85,7 +85,7 @@ static bool __head check_la57_support(unsigned long physaddr)	/// physaddr is th
 	 * 5-level paging is detected and enabled at kernel decomression
 	 * stage. Only check if it has been enabled there.
 	 */
-	if (!(native_read_cr4() & X86_CR4_LA57))
+	if (!(native_read_cr4() & X86_CR4_LA57))	/// If 5-level paging is enabled
 		return false;
 	/// Initialize some variables
 	*fixup_int(&__pgtable_l5_enabled, physaddr) = 1;
@@ -446,7 +446,8 @@ asmlinkage __visible void __init x86_64_start_kernel(char * real_mode_data)
 	 */
 	sme_early_init();
 
-	kasan_early_init();
+	kasan_early_init();	/// KASAN: Kernel Address SANitizer to make sure memory access is not out of boundary
+						/// It uses 1/8 memory as shadow memory to indicate if a mem area is accessible
 
 	idt_setup_early_handler();
 
