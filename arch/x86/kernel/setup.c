@@ -821,7 +821,7 @@ dump_kernel_offset(struct notifier_block *self, unsigned long v, void *p)
 void __init setup_arch(char **cmdline_p)
 {
 	memblock_reserve(__pa_symbol(_text),
-			 (unsigned long)__bss_stop - (unsigned long)_text);
+			 (unsigned long)__bss_stop - (unsigned long)_text);	/// Add range phyaddr([_text, __bss_stop]) to memblock.reserved
 
 	/*
 	 * Make sure page 0 is always reserved because on systems with
@@ -829,7 +829,7 @@ void __init setup_arch(char **cmdline_p)
 	 */
 	memblock_reserve(0, PAGE_SIZE);
 
-	early_reserve_initrd();
+	early_reserve_initrd();	/// Add range occupied by initrd to memblock.reserved
 
 	/*
 	 * At this point everything still needed from the boot loader
@@ -868,7 +868,7 @@ void __init setup_arch(char **cmdline_p)
 	 * If we have OLPC OFW, we might end up relocating the fixmap due to
 	 * reserve_top(), so do this before touching the ioremap area.
 	 */
-	olpc_ofw_detect();
+	olpc_ofw_detect();	/// One Laptop Per Child Open Firmware. Reserve mem range for the firmware
 
 	idt_setup_early_traps();
 	early_cpu_init();

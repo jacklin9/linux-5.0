@@ -44,7 +44,7 @@
 	.hidden _egot
 
 	__HEAD
-	.code32
+	.code32	### CPU has entered protected mode with paging disabled and CS/DS start at addr 0. This code can be loaded anywhere
 ENTRY(startup_32)
 	/*
 	 * 32bit entry is 0 and it is ABI so immutable!

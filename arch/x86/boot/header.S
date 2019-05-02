@@ -599,7 +599,7 @@ start_of_setup:
 ### The loader uses jmp %ds + 0x20:0 to go to setup. Can this normalization be done earlier?
 	pushw	%ds
 	pushw	$6f
-	lretw
+	lretw	### CS is the start addr of the real mode code (obsolete boot sector). So the real mode code can be loaded anywhere
 6:
 
 # Check signature at end of setup

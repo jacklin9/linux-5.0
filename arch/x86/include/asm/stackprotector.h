@@ -77,7 +77,7 @@ static __always_inline void boot_init_stack_canary(void)
 	canary += tsc + (tsc << 32UL);
 	canary &= CANARY_MASK;
 
-	current->stack_canary = canary;
+	current->stack_canary = canary;	/// Initially init_task
 #ifdef CONFIG_X86_64
 	this_cpu_write(irq_stack_union.stack_canary, canary);
 #else

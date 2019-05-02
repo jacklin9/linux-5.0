@@ -539,7 +539,7 @@ asmlinkage __visible void __init start_kernel(void)
 	char *command_line;
 	char *after_dashes;
 
-	set_task_stack_end_magic(&init_task);
+	set_task_stack_end_magic(&init_task);	/// Set the end of init_task stack to be guard value 
 	smp_setup_processor_id();
 	debug_objects_early_init();
 
@@ -553,7 +553,7 @@ asmlinkage __visible void __init start_kernel(void)
 	 * enable them.
 	 */
 	boot_cpu_init();
-	page_address_init();
+	page_address_init();	/// Init hashtable page_address_htable
 	pr_notice("%s", linux_banner);
 	setup_arch(&command_line);
 	/*

@@ -50,6 +50,19 @@ ABOUT KBUILD
     +------------------------------+--------------------------------------------+------------------------------------------------+
     See https://developer.ibm.com/articles/l-linuxboot/ for boot process.
     See document Documentation/x86/boot.txt for boot protocol
+
+	Real mode code can be loaded anywhere under 1M (the lower the better to avoid BIOS data) because it can be relocated by setting CS, DS correctly. Generally real mode code does 2 things:
+	a. copy boot parameters
+	b. setup GDT, switch to protected mode and jump to protected code
+	Note that a boot loader may ignore the real mode code and load protected code directly.
+
+	Protected code is also relocatable and thus can be loaded anywhere above 1M. It does following things:
+	a. Enable 4 level paging long mode
+	b. Enable 5 level paging long mode with the help of trampoline
+	c. Does relocation
+	d. Move itself to a safe place and decompress the vmlinux image
+	e. Relocate the decompressed vmlinux image and jump to it
+	Note that the protected code consists of two parts: 1. the 32 bit code without paging; 2. 64 bit code. A boot loader may ignore the 32 bit part and jump to 64 bit directly.
 5. So start reading kernel code from file arch/x86/boot/header.S. This should be read together with setup.ld
 6. arch/x86/boot/header.S contains two parts:
     Code from line 51 to line 287 is the boot sector. This sector contains two information:

@@ -10,11 +10,11 @@
  */
 
 #if IS_ENABLED(CONFIG_CPUSETS)
-SUBSYS(cpuset)
+SUBSYS(cpuset)	/// cpuset_cgrp_subsys
 #endif
 
 #if IS_ENABLED(CONFIG_CGROUP_SCHED)
-SUBSYS(cpu)
+SUBSYS(cpu)	/// cpu_cgrp_subsys
 #endif
 
 #if IS_ENABLED(CONFIG_CGROUP_CPUACCT)

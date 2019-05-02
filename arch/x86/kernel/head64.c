@@ -150,7 +150,7 @@ unsigned long __head __startup_64(unsigned long physaddr,
 	///       +--------------------+ ---------------------------------------------+
 
 	/* Is the address not 2M aligned? */
-	if (load_delta & ~PMD_PAGE_MASK)	/// 5 levels can map 57bit virtual address: PML5(9),PML4(9),PUD(9),PMD(9),PTE(9),offset(12)
+	if (load_delta & ~PMD_PAGE_MASK)	/// 5 levels can map 57bit virtual address: PGD(9),P4D(9),PUD(9),PMD(9),PTE(9),offset(12)
 		for (;;);						/// 4 levels: PGD(9), PUD(9), PMD(9), PTE(9), offset(12)
 
 	/* Activate Secure Memory Encryption (SME) if supported and enabled */
@@ -161,13 +161,13 @@ unsigned long __head __startup_64(unsigned long physaddr,
 
 	/* Fixup the physical addresses in the page table */
 
-	pgd = fixup_pointer(&early_top_pgt, physaddr);
+	pgd = fixup_pointer(&early_top_pgt, physaddr);	/// Start doing real virtual addr mapping
 	p = pgd + pgd_index(__START_KERNEL_map);
 	if (la57)
 		*p = (unsigned long)level4_kernel_pgt;
 	else
 		*p = (unsigned long)level3_kernel_pgt;
-	*p += _PAGE_TABLE_NOENC - __START_KERNEL_map + load_delta;
+	*p += _PAGE_TABLE_NOENC - __START_KERNEL_map + load_delta; /// Convert to physical addr
 
 	if (la57) {
 		p4d = fixup_pointer(&level4_kernel_pgt, physaddr);
@@ -190,7 +190,10 @@ unsigned long __head __startup_64(unsigned long physaddr,
 	 */
 
 	next_pgt_ptr = fixup_pointer(&next_early_pgt, physaddr);
-	pud = fixup_pointer(early_dynamic_pgts[(*next_pgt_ptr)++], physaddr);
+	pud = fixup_pointer(early_dynamic_pgts[(*next_pgt_ptr)++], physaddr);	/// early_dynamic_pgts is an array of page frames
+																			/// it is a dynamic mem to build temp mapping and
+																			/// can be alloc and free
+																			/// here it is used to build temp identity mapping
 	pmd = fixup_pointer(early_dynamic_pgts[(*next_pgt_ptr)++], physaddr);
 
 	pgtable_flags = _KERNPG_TABLE_NOENC + sme_get_me_mask();
@@ -198,7 +201,7 @@ unsigned long __head __startup_64(unsigned long physaddr,
 	if (la57) {
 		p4d = fixup_pointer(early_dynamic_pgts[next_early_pgt++], physaddr);
 
-		i = (physaddr >> PGDIR_SHIFT) % PTRS_PER_PGD;
+		i = (physaddr >> PGDIR_SHIFT) % PTRS_PER_PGD;	/// Put identity mapping to pgd
 		pgd[i + 0] = (pgdval_t)p4d + pgtable_flags;
 		pgd[i + 1] = (pgdval_t)p4d + pgtable_flags;
 
@@ -430,14 +433,14 @@ asmlinkage __visible void __init x86_64_start_kernel(char * real_mode_data)
 				(__START_KERNEL & PGDIR_MASK)));
 	BUILD_BUG_ON(__fix_to_virt(__end_of_fixed_addresses) <= MODULES_END);
 
-	cr4_init_shadow();
+	cr4_init_shadow();	/// Write CR4 content to per CPU storage
 
 	/* Kill off the identity-map trampoline */
-	reset_early_page_tables();
+	reset_early_page_tables(); /// Clean up the temp identity mapping and free up the dynamic page for mapping
 
 	clear_bss();
 
-	clear_page(init_top_pgt);
+	clear_page(init_top_pgt);	/// init_top_pgt is a page
 
 	/*
 	 * SME support may update early_pmd_flags to include the memory
