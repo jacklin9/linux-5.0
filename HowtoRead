@@ -113,3 +113,7 @@ ABOUT KBUILD
 9. The real kernel starts running at arch/x86/kernel/head_64.S:55. This should be read together with file 
     arch/x86/kernel/vmlinux.lds.S. This file calls arch/x86/kernel/head64.c, which in turn calls start_kernel 
     at init/main.c:537.
+
+10. Trap init is at arch/x86/kernel/idt.c:74
+
+11. When kernel init is almost done, kernel create a kernel thread running kernel_init, and another kernel thread running kthreadd, and jump to do_idle

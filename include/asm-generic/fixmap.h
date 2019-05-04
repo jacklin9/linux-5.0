@@ -30,7 +30,7 @@
 static __always_inline unsigned long fix_to_virt(const unsigned int idx)
 {
 	BUILD_BUG_ON(idx >= __end_of_fixed_addresses);
-	return __fix_to_virt(idx);
+	return __fix_to_virt(idx);	/// idx is reverse index from FIXADDR_TOP
 }
 
 static inline unsigned long virt_to_fix(const unsigned long vaddr)

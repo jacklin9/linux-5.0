@@ -516,21 +516,21 @@ void __init sme_enable(struct boot_params *bp)
 	me_mask = 1UL << (ebx & 0x3f);
 
 	/* Check if memory encryption is enabled */
-	if (feature_mask == AMD_SME_BIT) {
+	if (feature_mask == AMD_SME_BIT) {	/// We should enable SME
 		/* For SME, check the SYSCFG MSR */
 		msr = __rdmsr(MSR_K8_SYSCFG);
 		if (!(msr & MSR_K8_SYSCFG_MEM_ENCRYPT))
 			return;
-	} else {
+	} else {	/// We should enable SEV
 		/* For SEV, check the SEV MSR */
 		msr = __rdmsr(MSR_AMD64_SEV);
 		if (!(msr & MSR_AMD64_SEV_ENABLED))
 			return;
 
 		/* SEV state cannot be controlled by a command line option */
-		sme_me_mask = me_mask;
+		sme_me_mask = me_mask;	/// Bit mask used to enable SME
 		sev_enabled = true;
-		physical_mask &= ~sme_me_mask;
+		physical_mask &= ~sme_me_mask;	/// Bit mask used to get physical addr
 		return;
 	}
 
@@ -540,13 +540,13 @@ void __init sme_enable(struct boot_params *bp)
 	 * line argument data using rip-relative addressing.
 	 */
 	asm ("lea sme_cmdline_arg(%%rip), %0"
-	     : "=r" (cmdline_arg)
+	     : "=r" (cmdline_arg)	/// Put string addr of sme_cmdline_arg to cmdline_arg
 	     : "p" (sme_cmdline_arg));
 	asm ("lea sme_cmdline_on(%%rip), %0"
-	     : "=r" (cmdline_on)
+	     : "=r" (cmdline_on)	/// Put string addr of sme_cmdline_on to cmdline_on
 	     : "p" (sme_cmdline_on));
 	asm ("lea sme_cmdline_off(%%rip), %0"
-	     : "=r" (cmdline_off)
+	     : "=r" (cmdline_off)	/// Put string addr of sme_cmdline_off to cmdline_off
 	     : "p" (sme_cmdline_off));
 
 	if (IS_ENABLED(CONFIG_AMD_MEM_ENCRYPT_ACTIVE_BY_DEFAULT))

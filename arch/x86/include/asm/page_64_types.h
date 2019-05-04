@@ -43,7 +43,7 @@
  * a hypervisor (16 slots). Choosing 16 slots for a hypervisor is arbitrary,
  * but it's what Xen requires.
  */
-#define __PAGE_OFFSET_BASE_L5	_AC(0xff11000000000000, UL)
+#define __PAGE_OFFSET_BASE_L5	_AC(0xff11000000000000, UL)	/// __PAGE_OFFSET_BASE is the starting virtual addr of kernel
 #define __PAGE_OFFSET_BASE_L4	_AC(0xffff888000000000, UL)
 
 #ifdef CONFIG_DYNAMIC_MEMORY_LAYOUT

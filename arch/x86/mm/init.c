@@ -647,9 +647,9 @@ void __init init_mem_mapping(void)
 {
 	unsigned long end;
 
-	pti_check_boottime_disable();
+	pti_check_boottime_disable();	/// Page Table Isolation
 	probe_page_size_mask();
-	setup_pcid();
+	setup_pcid();	/// Process Context ID: CPU feature to avoid TLB flush
 
 #ifdef CONFIG_X86_64
 	end = max_pfn << PAGE_SHIFT;

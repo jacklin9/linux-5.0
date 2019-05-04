@@ -201,7 +201,7 @@ ENTRY(secondary_startup_64)
 	 * union.  If the stack protector canary is enabled, it is
 	 * located at %gs:40.  Note that, on SMP, the boot cpu uses
 	 * init data section till per cpu areas are set up.
-	 */
+	 */	/// GS is a special register in 64bit mode
 	movl	$MSR_GS_BASE,%ecx
 	movl	initial_gs(%rip),%eax
 	movl	initial_gs+4(%rip),%edx

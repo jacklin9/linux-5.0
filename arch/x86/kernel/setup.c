@@ -400,11 +400,11 @@ static void __init parse_setup_data(void)
 	struct setup_data *data;
 	u64 pa_data, pa_next;
 
-	pa_data = boot_params.hdr.setup_data;
+	pa_data = boot_params.hdr.setup_data;	/// Phy addr of the setup data linked list
 	while (pa_data) {
 		u32 data_len, data_type;
 
-		data = early_memremap(pa_data, sizeof(*data));
+		data = early_memremap(pa_data, sizeof(*data));	/// Make temp map, get values, and unmap
 		data_len = data->len + sizeof(struct setup_data);
 		data_type = data->type;
 		pa_next = data->next;
@@ -872,7 +872,7 @@ void __init setup_arch(char **cmdline_p)
 
 	idt_setup_early_traps();
 	early_cpu_init();
-	arch_init_ideal_nops();
+	arch_init_ideal_nops();	/// Find best nops array according to CPU
 	jump_label_init();
 	early_ioremap_init();
 
@@ -910,13 +910,14 @@ void __init setup_arch(char **cmdline_p)
 	}
 #endif
 
-	x86_init.oem.arch_setup();
+	x86_init.oem.arch_setup();	/// X86 specific init
 
-	iomem_resource.end = (1ULL << boot_cpu_data.x86_phys_bits) - 1;
+	iomem_resource.end = (1ULL << boot_cpu_data.x86_phys_bits) - 1;	/// Resource is a tree-like structure
+																	/// The end of iomem_resource is end of phy addr
 	e820__memory_setup();
 	parse_setup_data();
 
-	copy_edd();
+	copy_edd();	/// Enhanced Disk Drive
 
 	if (!boot_params.hdr.root_flags)
 		root_mountflags &= ~MS_RDONLY;
@@ -925,7 +926,7 @@ void __init setup_arch(char **cmdline_p)
 	init_mm.end_data = (unsigned long) _edata;
 	init_mm.brk = _brk_end;
 
-	mpx_mm_init(&init_mm);
+	mpx_mm_init(&init_mm);	/// Intel Memory Protection Extension
 
 	code_resource.start = __pa_symbol(_text);
 	code_resource.end = __pa_symbol(_etext)-1;
@@ -1005,7 +1006,7 @@ void __init setup_arch(char **cmdline_p)
 	if (efi_enabled(EFI_BOOT))
 		efi_init();
 
-	dmi_scan_machine();
+	dmi_scan_machine();	/// Desktop Management Interface
 	dmi_memdev_walk();
 	dmi_set_dump_stack_arch_desc();
 
@@ -1019,7 +1020,7 @@ void __init setup_arch(char **cmdline_p)
 	x86_init.resources.probe_roms();
 
 	/* after parse_early_param, so could debug it */
-	insert_resource(&iomem_resource, &code_resource);
+	insert_resource(&iomem_resource, &code_resource);	/// struct resource see include/linux/ioport.h
 	insert_resource(&iomem_resource, &data_resource);
 	insert_resource(&iomem_resource, &bss_resource);
 
@@ -1044,7 +1045,7 @@ void __init setup_arch(char **cmdline_p)
 	max_pfn = e820__end_of_ram_pfn();
 
 	/* update e820 for memory not covered by WB MTRRs */
-	mtrr_bp_init();
+	mtrr_bp_init();	/// MTRR: Memory Type Range Register. PAT: Page Attribute Table
 	if (mtrr_trim_uncached_memory(max_pfn))
 		max_pfn = e820__end_of_ram_pfn();
 
@@ -1133,7 +1134,7 @@ void __init setup_arch(char **cmdline_p)
 
 	init_mem_mapping();
 
-	idt_setup_early_pf();
+	idt_setup_early_pf();	/// Add Page Fault handler
 
 	/*
 	 * Update mmu_cr4_features (and, indirectly, trampoline_cr4_features)

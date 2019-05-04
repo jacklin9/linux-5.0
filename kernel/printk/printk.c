@@ -1113,7 +1113,7 @@ void __init setup_log_buf(int early)
 	char *new_log_buf;
 	unsigned int free;
 
-	if (log_buf != __log_buf)
+	if (log_buf != __log_buf)	/// Initially log_buf == __log_buf. After the setup, the condition will not hold
 		return;
 
 	if (!early && !new_log_buf_len)

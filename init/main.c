@@ -399,7 +399,7 @@ noinline void __ref rest_init(void)
 	struct task_struct *tsk;
 	int pid;
 
-	rcu_scheduler_starting();
+	rcu_scheduler_starting();	/// Read-Copy-Update
 	/*
 	 * We need to spawn init first so that it obtains pid 1, however
 	 * the init task will end up wanting to create kthreads, which, if

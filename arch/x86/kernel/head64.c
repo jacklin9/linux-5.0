@@ -85,11 +85,11 @@ static bool __head check_la57_support(unsigned long physaddr)	/// physaddr is th
 	 * 5-level paging is detected and enabled at kernel decomression
 	 * stage. Only check if it has been enabled there.
 	 */
-	if (!(native_read_cr4() & X86_CR4_LA57))	/// If 5-level paging is enabled
+	if (!(native_read_cr4() & X86_CR4_LA57))	/// Check if 5-level paging is enabled
 		return false;
 	/// Initialize some variables
 	*fixup_int(&__pgtable_l5_enabled, physaddr) = 1;
-	*fixup_int(&pgdir_shift, physaddr) = 48;
+	*fixup_int(&pgdir_shift, physaddr) = 48;	/// PGD(9), P4D(9), PUD(9), PMD(9), PTE(9), page offset(12)
 	*fixup_int(&ptrs_per_p4d, physaddr) = 512;
 	*fixup_long(&page_offset_base, physaddr) = __PAGE_OFFSET_BASE_L5;
 	*fixup_long(&vmalloc_base, physaddr) = __VMALLOC_BASE_L5;
@@ -145,7 +145,7 @@ unsigned long __head __startup_64(unsigned long physaddr,
 	///                           Virtual map
 	///       +--------------+----------------------------------------------------+
 	///       |                    |                                              |
-	///    START_KERNL_map       _text                                            |
+	///    START_KERNEL_map      _text                                            |
 	///       |                    |                                              |
 	///       +--------------------+ ---------------------------------------------+
 
@@ -154,14 +154,14 @@ unsigned long __head __startup_64(unsigned long physaddr,
 		for (;;);						/// 4 levels: PGD(9), PUD(9), PMD(9), PTE(9), offset(12)
 
 	/* Activate Secure Memory Encryption (SME) if supported and enabled */
-	sme_enable(bp);
+	sme_enable(bp);	/// Initialize some bit masks
 
 	/* Include the SME encryption mask in the fixup value */
 	load_delta += sme_get_me_mask();
 
 	/* Fixup the physical addresses in the page table */
 
-	pgd = fixup_pointer(&early_top_pgt, physaddr);	/// Start doing real virtual addr mapping
+	pgd = fixup_pointer(&early_top_pgt, physaddr);	/// Start doing real virtual addr mapping. Use early_top_pgt as pgt
 	p = pgd + pgd_index(__START_KERNEL_map);
 	if (la57)
 		*p = (unsigned long)level4_kernel_pgt;
@@ -417,7 +417,7 @@ static void __init copy_bootdata(char *real_mode_data)
 	sme_unmap_bootdata(real_mode_data);
 }
 
-asmlinkage __visible void __init x86_64_start_kernel(char * real_mode_data)
+asmlinkage __visible void __init x86_64_start_kernel(char * real_mode_data)	/// Before here, virtual addr and identity mapping is setup
 {
 	/*
 	 * Build-time sanity checks on the kernel image and module

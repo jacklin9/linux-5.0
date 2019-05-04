@@ -755,10 +755,10 @@ static inline pmd_t * __init early_ioremap_pmd(unsigned long addr)
 {
 	/* Don't assume we're using swapper_pg_dir at this point */
 	pgd_t *base = __va(read_cr3_pa());
-	pgd_t *pgd = &base[pgd_index(addr)];
-	p4d_t *p4d = p4d_offset(pgd, addr);
-	pud_t *pud = pud_offset(p4d, addr);
-	pmd_t *pmd = pmd_offset(pud, addr);
+	pgd_t *pgd = &base[pgd_index(addr)];	/// pgd entry (pointer to p4d)
+	p4d_t *p4d = p4d_offset(pgd, addr);		/// p4d entry (pointer to pud)
+	pud_t *pud = pud_offset(p4d, addr);		/// pud entry (pointer to pmd)
+	pmd_t *pmd = pmd_offset(pud, addr);		/// pmd entry (pointer to pte)
 
 	return pmd;
 }
@@ -778,16 +778,16 @@ void __init early_ioremap_init(void)
 	pmd_t *pmd;
 
 #ifdef CONFIG_X86_64
-	BUILD_BUG_ON((fix_to_virt(0) + PAGE_SIZE) & ((1 << PMD_SHIFT) - 1));
+	BUILD_BUG_ON((fix_to_virt(0) + PAGE_SIZE) & ((1 << PMD_SHIFT) - 1));	/// Make sure it is 2M aligned. Slot 0 should be last page in virtual addr space
 #else
 	WARN_ON((fix_to_virt(0) + PAGE_SIZE) & ((1 << PMD_SHIFT) - 1));
 #endif
 
 	early_ioremap_setup();
 
-	pmd = early_ioremap_pmd(fix_to_virt(FIX_BTMAP_BEGIN));
-	memset(bm_pte, 0, sizeof(bm_pte));
-	pmd_populate_kernel(&init_mm, pmd, bm_pte);
+	pmd = early_ioremap_pmd(fix_to_virt(FIX_BTMAP_BEGIN));	/// Each pmd entry can map 2^9 (512) pages
+	memset(bm_pte, 0, sizeof(bm_pte));	/// PTE table
+	pmd_populate_kernel(&init_mm, pmd, bm_pte);	/// init_mm is the kernel mm struct. Add the page to pmd
 
 	/*
 	 * The boot-ioremap range spans multiple pmds, for which

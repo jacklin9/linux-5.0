@@ -80,7 +80,7 @@ void __init early_ioremap_setup(void)
 		if (WARN_ON(prev_map[i]))
 			break;
 
-	for (i = 0; i < FIX_BTMAPS_SLOTS; i++)
+	for (i = 0; i < FIX_BTMAPS_SLOTS; i++)	/// Each slot has NR_FIX_BTMAPS, totally NR_FIX_BTMAPS * FIX_BTMAPS_SLOTS
 		slot_virt[i] = __fix_to_virt(FIX_BTMAP_BEGIN - NR_FIX_BTMAPS*i);
 }
 
@@ -114,7 +114,7 @@ __early_ioremap(resource_size_t phys_addr, unsigned long size, pgprot_t prot)
 	WARN_ON(system_state >= SYSTEM_RUNNING);
 
 	slot = -1;
-	for (i = 0; i < FIX_BTMAPS_SLOTS; i++) {
+	for (i = 0; i < FIX_BTMAPS_SLOTS; i++) {	/// Each slot has NR_FIX_BTMAPS(64) entries (each entry point to a page)
 		if (!prev_map[i]) {
 			slot = i;
 			break;
