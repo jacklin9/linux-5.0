@@ -142,7 +142,7 @@ END(native_usergs_sysret64)
  * with them due to bugs in both AMD and Intel CPUs.
  */
 
-ENTRY(entry_SYSCALL_64)
+ENTRY(entry_SYSCALL_64)	### This is the syscall entry
 	UNWIND_HINT_EMPTY
 	/*
 	 * Interrupts are off on entry.
@@ -967,7 +967,7 @@ _ASM_NOKPROBE(\sym)
 END(\sym)
 .endm
 
-idtentry divide_error			do_divide_error			has_error_code=0
+idtentry divide_error			do_divide_error			has_error_code=0	### idtentry see line 882
 idtentry overflow			do_overflow			has_error_code=0
 idtentry bounds				do_bounds			has_error_code=0
 idtentry invalid_op			do_invalid_op			has_error_code=0

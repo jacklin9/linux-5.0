@@ -71,7 +71,7 @@ static const __initconst struct idt_data early_idts[] = {
  * the traps which use them are reinitialized with IST after cpu_init() has
  * set up TSS.
  */
-static const __initconst struct idt_data def_idts[] = {
+static const __initconst struct idt_data def_idts[] = {	/// These entries are defined in arch/x86/entry/entry_64.S:970
 	INTG(X86_TRAP_DE,		divide_error),
 	INTG(X86_TRAP_NMI,		nmi),
 	INTG(X86_TRAP_BR,		bounds),
