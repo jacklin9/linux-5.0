@@ -570,7 +570,7 @@ static inline void file_pos_write(struct file *file, loff_t pos)
 
 ssize_t ksys_read(unsigned int fd, char __user *buf, size_t count)
 {
-	struct fd f = fdget_pos(fd);
+	struct fd f = fdget_pos(fd);	/// struct fd include file pointer and open flags
 	ssize_t ret = -EBADF;
 
 	if (f.file) {
