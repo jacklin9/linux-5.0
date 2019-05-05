@@ -52,7 +52,8 @@ L3_START_KERNEL = pud_index(__START_KERNEL_map)
 	__HEAD
 	.code64
 	.globl startup_64
-startup_64:
+startup_64:	### The entry of the 64-bit code. We come here either from linux 32 bit code or from a 64 bit loader. So something done in
+			### 32-bit needs redone here
 	UNWIND_HINT_EMPTY
 	/*
 	 * At this point the CPU runs in 64bit mode CS.L = 1 CS.D = 0,
