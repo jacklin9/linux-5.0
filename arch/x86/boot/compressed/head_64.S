@@ -44,7 +44,8 @@
 	.hidden _egot
 
 	__HEAD
-	.code32	### CPU has entered protected mode with paging disabled and CS/DS start at addr 0. This code can be loaded anywhere
+	.code32	### CPU has entered protected mode with paging disabled and CS/DS start at addr 0. This code can be loaded anywhere above 1M.
+			### Highly possible it is loaded at 1M. But the addresses in the code start from addr 0. We need be careful
 ENTRY(startup_32)
 	/*
 	 * 32bit entry is 0 and it is ABI so immutable!
@@ -57,7 +58,9 @@ ENTRY(startup_32)
 	 * Test KEEP_SEGMENTS flag to see if the bootloader is asking
 	 * us to not reload segments
 	 */
-	testb $KEEP_SEGMENTS, BP_loadflags(%esi)
+	testb $KEEP_SEGMENTS, BP_loadflags(%esi)	### Why do we need to check the flag and reload ds, es, and ss if needed here?
+												### The reason is it may not necessary that running thread come here from linux real mode 
+												### code. It may be from a 32 bit boot loader
 	jnz 1f
 	### KEEP_SEGMENTS is not set, so reload ds, es, and ss
 	cli
@@ -105,11 +108,11 @@ ENTRY(startup_32)
 	addl	%eax, %ebx
 	notl	%eax
 	andl	%eax, %ebx	### Put the aligned addr of startup_32 to ebx
-	cmpl	$LOAD_PHYSICAL_ADDR, %ebx	### LOAD_PHYSICAL_ADDR is 16M
+	cmpl	$LOAD_PHYSICAL_ADDR, %ebx	### LOAD_PHYSICAL_ADDR is 16M. This is the lower bound of the relocated kernel addr
 	jge	1f	### if ebx is bigger than LOAD_PHYSICAL_ADDR
 #endif
 	movl	$LOAD_PHYSICAL_ADDR, %ebx
-1:	### ebx contains the new loading address to run the decompressing
+1:	### ebx contains the new start address of kernel to run the decompressing
 
 	/* Target address to relocate to for decompression */
 	movl	BP_init_size(%esi), %eax	### esi contains phy addr of boot_params. init_size contains the size of the decompressed image

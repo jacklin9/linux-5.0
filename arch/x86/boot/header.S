@@ -573,7 +573,7 @@ start_of_setup:
 # stack behind its own code, so we can't blindly put it directly past the heap.
 
 	movw	%ss, %dx
-	cmpw	%ax, %dx	# %ds == %ss?
+	cmpw	%ax, %dx	# %ds == %ss?	### ax contains content of ds
 	movw	%sp, %dx
 	je	2f		# -> assume %sp is reasonably set
 
@@ -581,7 +581,7 @@ start_of_setup:
 	movw	$_end, %dx
 	testb	$CAN_USE_HEAP, loadflags
 	jz	1f
-	movw	heap_end_ptr, %dx
+	movw	heap_end_ptr, %dx	### heap_end_ptr is set by boot loader
 1:	addw	$STACK_SIZE, %dx
 	jnc	2f
 	xorw	%dx, %dx	# Prevent wraparound
