@@ -827,7 +827,7 @@ void __init setup_arch(char **cmdline_p)
 	 * Make sure page 0 is always reserved because on systems with
 	 * L1TF its contents can be leaked to user processes.
 	 */
-	memblock_reserve(0, PAGE_SIZE);
+	memblock_reserve(0, PAGE_SIZE);	/// A vulnerability of Intel chip. So this page should not be used by kernel/user
 
 	early_reserve_initrd();	/// Add range occupied by initrd to memblock.reserved
 
@@ -914,6 +914,7 @@ void __init setup_arch(char **cmdline_p)
 
 	iomem_resource.end = (1ULL << boot_cpu_data.x86_phys_bits) - 1;	/// Resource is a tree-like structure
 																	/// The end of iomem_resource is end of phy addr
+																	/// boot_cpu_data is init in early_cpu_init()
 	e820__memory_setup();
 	parse_setup_data();
 

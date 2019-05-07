@@ -1200,7 +1200,7 @@ char *__init e820__memory_setup_default(void)
 	 * Otherwise fake a memory map; one section from 0k->640k,
 	 * the next section from 1mb->appropriate_mem_k
 	 */
-	if (append_e820_table(boot_params.e820_table, boot_params.e820_entries) < 0) {
+	if (append_e820_table(boot_params.e820_table, boot_params.e820_entries) < 0) {	/// First try to use e820 result
 		u64 mem_size;
 
 		/* Compare results from other methods and take the one that gives more RAM: */
@@ -1212,9 +1212,9 @@ char *__init e820__memory_setup_default(void)
 			who = "BIOS-e801";
 		}
 
-		e820_table->nr_entries = 0;
+		e820_table->nr_entries = 0;	/// Initialize e820 table
 		e820__range_add(0, LOWMEMSIZE(), E820_TYPE_RAM);
-		e820__range_add(HIGH_MEMORY, mem_size << 10, E820_TYPE_RAM);
+		e820__range_add(HIGH_MEMORY, mem_size << 10, E820_TYPE_RAM);	/// High mem starts from 1M
 	}
 
 	/* We just appended a lot of ranges, sanitize the table: */
@@ -1235,7 +1235,7 @@ void __init e820__memory_setup(void)
 	/* This is a firmware interface ABI - make sure we don't break it: */
 	BUILD_BUG_ON(sizeof(struct boot_e820_entry) != 20);
 
-	who = x86_init.resources.memory_setup();	/// e820__memory_setup_default
+	who = x86_init.resources.memory_setup();	/// Actually call e820__memory_setup_default to setup memory range list
 
 	memcpy(e820_table_kexec, e820_table, sizeof(*e820_table_kexec));
 	memcpy(e820_table_firmware, e820_table, sizeof(*e820_table_firmware));

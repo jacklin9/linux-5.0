@@ -843,7 +843,7 @@ apicinterrupt IRQ_WORK_VECTOR			irq_work_interrupt		smp_irq_work_interrupt
  */
 #define CPU_TSS_IST(x) PER_CPU_VAR(cpu_tss_rw) + (TSS_ist + ((x) - 1) * 8)
 
-/**
+/**		/// IST: interrupt stack table
  * idtentry - Generate an IDT entry stub
  * @sym:		Name of the generated entry point
  * @do_sym: 		C function to be called

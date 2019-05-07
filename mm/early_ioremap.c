@@ -81,7 +81,7 @@ void __init early_ioremap_setup(void)
 			break;
 
 	for (i = 0; i < FIX_BTMAPS_SLOTS; i++)	/// Each slot has NR_FIX_BTMAPS, totally NR_FIX_BTMAPS * FIX_BTMAPS_SLOTS
-		slot_virt[i] = __fix_to_virt(FIX_BTMAP_BEGIN - NR_FIX_BTMAPS*i);
+		slot_virt[i] = __fix_to_virt(FIX_BTMAP_BEGIN - NR_FIX_BTMAPS*i);	/// BEGIN, BEGIN - NR, BEGIN - 2 * NR, ...
 }
 
 static int __init check_early_ioremap_leak(void)
