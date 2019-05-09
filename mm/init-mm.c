@@ -25,7 +25,7 @@
  * Since there is only one init_mm in the entire system, keep it simple
  * and size this cpu_bitmask to NR_CPUS.
  */
-struct mm_struct init_mm = {
+struct mm_struct init_mm = {	/// mm_struct for init proc
 	.mm_rb		= RB_ROOT,
 	.pgd		= swapper_pg_dir,
 	.mm_users	= ATOMIC_INIT(2),

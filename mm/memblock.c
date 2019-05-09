@@ -582,9 +582,9 @@ static void __init_memblock memblock_insert_region(struct memblock_type *type,
  * Return:
  * 0 on success, -errno on failure.
  */
-int __init_memblock memblock_add_range(struct memblock_type *type,
-				phys_addr_t base, phys_addr_t size,
-				int nid, enum memblock_flags flags)
+int __init_memblock memblock_add_range(struct memblock_type *type,	/// Add the region to the mem type region list. If ther is
+				phys_addr_t base, phys_addr_t size,					/// overlap, respect the existing region, and add not-yet
+				int nid, enum memblock_flags flags)					/// covered region as a new region
 {
 	bool insert = false;
 	phys_addr_t obase = base;
@@ -618,14 +618,14 @@ repeat:
 		phys_addr_t rbase = rgn->base;
 		phys_addr_t rend = rbase + rgn->size;
 
-		if (rbase >= end)
+		if (rbase >= end)	/// Find a region that is after the to be inserted region
 			break;
-		if (rend <= base)
+		if (rend <= base)	/// Still not find the place to insert
 			continue;
 		/*
 		 * @rgn overlaps.  If it separates the lower part of new
 		 * area, insert that portion.
-		 */
+		 */	/// rbase < end && rend > base
 		if (rbase > base) {
 #ifdef CONFIG_HAVE_MEMBLOCK_NODE_MAP
 			WARN_ON(nid != memblock_get_region_node(rgn));
