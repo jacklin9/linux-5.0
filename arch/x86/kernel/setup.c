@@ -397,7 +397,7 @@ static void __init reserve_initrd(void)
 
 static void __init parse_setup_data(void)
 {
-	struct setup_data *data;
+	struct setup_data *data;	/// setup_data is a linked list written by boot loader
 	u64 pa_data, pa_next;
 
 	pa_data = boot_params.hdr.setup_data;	/// Phy addr of the setup data linked list
@@ -415,7 +415,7 @@ static void __init parse_setup_data(void)
 			e820__memory_setup_extended(pa_data, data_len);
 			break;
 		case SETUP_DTB:
-			add_dtb(pa_data);
+			add_dtb(pa_data);	/// Device Tree Blob
 			break;
 		case SETUP_EFI:
 			parse_efi_setup(pa_data, data_len);
@@ -915,7 +915,7 @@ void __init setup_arch(char **cmdline_p)
 	iomem_resource.end = (1ULL << boot_cpu_data.x86_phys_bits) - 1;	/// Resource is a tree-like structure
 																	/// The end of iomem_resource is end of phy addr
 																	/// boot_cpu_data is init in early_cpu_init()
-	e820__memory_setup();
+	e820__memory_setup();	/// Collect mem range information from BIOS data
 	parse_setup_data();
 
 	copy_edd();	/// Enhanced Disk Drive
@@ -929,7 +929,7 @@ void __init setup_arch(char **cmdline_p)
 
 	mpx_mm_init(&init_mm);	/// Intel Memory Protection Extension
 
-	code_resource.start = __pa_symbol(_text);
+	code_resource.start = __pa_symbol(_text);	/// Physical addr
 	code_resource.end = __pa_symbol(_etext)-1;
 	data_resource.start = __pa_symbol(_etext);
 	data_resource.end = __pa_symbol(_edata)-1;
@@ -959,7 +959,7 @@ void __init setup_arch(char **cmdline_p)
 	 * again from within noexec_setup() during parsing early parameters
 	 * to honor the respective command line option.
 	 */
-	x86_configure_nx();
+	x86_configure_nx();	/// Init pte_mask
 
 	parse_early_param();
 
@@ -1220,7 +1220,7 @@ void __init setup_arch(char **cmdline_p)
 
 	tboot_probe();
 
-	map_vsyscall();
+	map_vsyscall();	/// System call implementation in user space
 
 	generic_apic_probe();
 

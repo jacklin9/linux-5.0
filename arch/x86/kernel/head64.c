@@ -110,8 +110,8 @@ static bool __head check_la57_support(unsigned long physaddr)
  * boot-time crashes. To work around this problem, every global pointer must
  * be adjusted using fixup_pointer().
  */
-unsigned long __head __startup_64(unsigned long physaddr,
-				  struct boot_params *bp)
+unsigned long __head __startup_64(unsigned long physaddr,	/// Physical addr of _text
+				  struct boot_params *bp)	/// Physical addr of boot params
 {
 	unsigned long vaddr, vaddr_end;
 	unsigned long load_delta, *p;
@@ -162,20 +162,20 @@ unsigned long __head __startup_64(unsigned long physaddr,
 	/* Fixup the physical addresses in the page table */
 
 	pgd = fixup_pointer(&early_top_pgt, physaddr);	/// Start doing real virtual addr mapping. Use early_top_pgt as pgt
-	p = pgd + pgd_index(__START_KERNEL_map);
+	p = pgd + pgd_index(__START_KERNEL_map);	/// Virtual addr of kernel starting point
 	if (la57)
-		*p = (unsigned long)level4_kernel_pgt;
+		*p = (unsigned long)level4_kernel_pgt;	/// Kernel space size is 2GB, so only one P4D entry (one PUD table, in which only 2 entries are needed) is needed to map it
 	else
 		*p = (unsigned long)level3_kernel_pgt;
 	*p += _PAGE_TABLE_NOENC - __START_KERNEL_map + load_delta; /// Convert to physical addr
 
 	if (la57) {
 		p4d = fixup_pointer(&level4_kernel_pgt, physaddr);
-		p4d[511] += load_delta;
+		p4d[511] += load_delta;	/// No need to set p4d[511] to level3_kernel_pgt because it is statically set during its definition
 	}
 
 	pud = fixup_pointer(&level3_kernel_pgt, physaddr);
-	pud[510] += load_delta;
+	pud[510] += load_delta;	/// Only 2 entries of pud is used. No need to set pud[510] and pud[511] to corresponding pmds because they are statically set
 	pud[511] += load_delta;
 
 	pmd = fixup_pointer(level2_fixmap_pgt, physaddr);
@@ -194,7 +194,7 @@ unsigned long __head __startup_64(unsigned long physaddr,
 																			/// it is a dynamic mem to build temp mapping and
 																			/// can be alloc and free
 																			/// here it is used to build temp identity mapping
-	pmd = fixup_pointer(early_dynamic_pgts[(*next_pgt_ptr)++], physaddr);
+	pmd = fixup_pointer(early_dynamic_pgts[(*next_pgt_ptr)++], physaddr);	/// Very trivial page frame allocator
 
 	pgtable_flags = _KERNPG_TABLE_NOENC + sme_get_me_mask();
 
@@ -436,7 +436,7 @@ asmlinkage __visible void __init x86_64_start_kernel(char * real_mode_data)	/// 
 	cr4_init_shadow();	/// Write CR4 content to per CPU storage
 
 	/* Kill off the identity-map trampoline */
-	reset_early_page_tables(); /// Clean up the temp identity mapping and free up the dynamic page for mapping
+	reset_early_page_tables(); /// Clean up the temp identity mapping and free up the dynamic page for mapping. Still using early_top_pgt
 
 	clear_bss();
 
@@ -452,7 +452,7 @@ asmlinkage __visible void __init x86_64_start_kernel(char * real_mode_data)	/// 
 	kasan_early_init();	/// KASAN: Kernel Address SANitizer to make sure memory access is not out of boundary
 						/// It uses 1/8 memory as shadow memory to indicate if a mem area is accessible
 
-	idt_setup_early_handler();
+	idt_setup_early_handler();	/// Set idt to be early_idt_handler_array
 
 	copy_bootdata(__va(real_mode_data));
 
@@ -462,7 +462,7 @@ asmlinkage __visible void __init x86_64_start_kernel(char * real_mode_data)	/// 
 	load_ucode_bsp();
 
 	/* set init_top_pgt kernel high mapping*/
-	init_top_pgt[511] = early_top_pgt[511];
+	init_top_pgt[511] = early_top_pgt[511];	/// Initialize init_top_pgt
 
 	x86_64_start_reservations(real_mode_data);
 }

@@ -2259,10 +2259,10 @@ void __init boot_cpu_init(void)
 	int cpu = smp_processor_id();
 
 	/* Mark the boot cpu "present", "online" etc for SMP and UP case */
-	set_cpu_online(cpu, true);
-	set_cpu_active(cpu, true);
-	set_cpu_present(cpu, true);
-	set_cpu_possible(cpu, true);
+	set_cpu_online(cpu, true);	/// Online: cpu is turned on
+	set_cpu_active(cpu, true);	/// Active: cpu is up 
+	set_cpu_present(cpu, true);	/// Present: cpu is inserted
+	set_cpu_possible(cpu, true);	/// possible: there is a cpu slot
 
 #ifdef CONFIG_SMP
 	__boot_cpu_id = cpu;

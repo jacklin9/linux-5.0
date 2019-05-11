@@ -46,7 +46,7 @@ static int printk_safe_irq_ready __read_mostly;
 				sizeof(atomic_t) -			\
 				sizeof(struct irq_work))
 
-struct printk_safe_seq_buf {
+struct printk_safe_seq_buf {	/// 8KB area
 	atomic_t		len;	/* length of written data */
 	atomic_t		message_lost;
 	struct irq_work		work;	/* IRQ work that flushes the buffer */

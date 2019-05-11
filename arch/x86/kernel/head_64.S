@@ -75,7 +75,7 @@ startup_64:	### The entry of the 64-bit code. We come here either from linux 32 
 
 	/* Set up the stack for verify_cpu(), similar to initial_stack below */
 	leaq	(__end_init_task - SIZEOF_PTREGS)(%rip), %rsp	### Use IP relative relocation to find real addr
-															### __end_init_task is the end addr of init task
+															### __end_init_task is the end addr of init task data
 															### SIZEOF_PTREGS is the size of call stack frame size of trap/syscall
 
 	/* Sanitize CPU configuration */
@@ -137,13 +137,13 @@ ENTRY(secondary_startup_64)
 	movq	%rcx, %cr4
 
 	/* Setup early boot stage 4-/5-level pagetables. */
-	addq	phys_base(%rip), %rax	### Use the newly setup mapping
+	addq	phys_base(%rip), %rax	### Use the newly setup mapping, that is early_top_pgt
 	movq	%rax, %cr3
 
 	/* Ensure I am executing from virtual addresses */
 	movq	$1f, %rax
 	ANNOTATE_RETPOLINE_SAFE
-	jmp	*%rax	### From here we are executing from virtual addresses
+	jmp	*%rax	### From here we are executing in virtual addresses
 1:
 	UNWIND_HINT_EMPTY
 
@@ -180,11 +180,11 @@ ENTRY(secondary_startup_64)
 	 * addresses where we're currently running on. We have to do that here
 	 * because in 32bit we couldn't load a 64bit linear address.
 	 */
-	lgdt	early_gdt_descr(%rip)
+	lgdt	early_gdt_descr(%rip)	### Use early_gdt_descr (points to per_cpu_gdt_page) as gdt descr
 
 	/* set up data segments */
 	xorl %eax,%eax
-	movl %eax,%ds
+	movl %eax,%ds	### In x64 null seg selector can be used in ds, ss, es
 	movl %eax,%ss
 	movl %eax,%es
 
@@ -240,7 +240,7 @@ ENTRY(secondary_startup_64)
 	 */
 	pushq	$.Lafter_lret	# put return address on stack for unwinder
 	xorl	%ebp, %ebp	# clear frame pointer
-	movq	initial_code(%rip), %rax	### initial_code see line 265
+	movq	initial_code(%rip), %rax
 	pushq	$__KERNEL_CS	# set correct cs
 	pushq	%rax		# target address in negative space
 	lretq	### Jump to x86_64_start_kernel actually
@@ -451,7 +451,7 @@ NEXT_PAGE(level2_kernel_pgt)
 NEXT_PAGE(level2_fixmap_pgt)
 	.fill	(512 - 4 - FIXMAP_PMD_NUM),8,0
 	pgtno = 0
-	.rept (FIXMAP_PMD_NUM)
+	.rept (FIXMAP_PMD_NUM)	/// 4MB fix map
 	.quad level1_fixmap_pgt + (pgtno << PAGE_SHIFT) - __START_KERNEL_map \
 		+ _PAGE_TABLE_NOENC;
 	pgtno = pgtno + 1

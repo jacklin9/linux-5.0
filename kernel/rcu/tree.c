@@ -3677,9 +3677,9 @@ static void __init rcu_init_geometry(void)
 	 * jiffies_till_next_fqs are set to the RCU_JIFFIES_TILL_FORCE_QS
 	 * value, which is a function of HZ, then adding one for each
 	 * RCU_JIFFIES_FQS_DIV CPUs that might be on the system.
-	 */
+	 */	/// Force Quiescent State
 	d = RCU_JIFFIES_TILL_FORCE_QS + nr_cpu_ids / RCU_JIFFIES_FQS_DIV;
-	if (jiffies_till_first_fqs == ULONG_MAX)
+	if (jiffies_till_first_fqs == ULONG_MAX)	/// Default value
 		jiffies_till_first_fqs = d;
 	if (jiffies_till_next_fqs == ULONG_MAX)
 		jiffies_till_next_fqs = d;
@@ -3712,7 +3712,7 @@ static void __init rcu_init_geometry(void)
 	 */
 	rcu_capacity[0] = rcu_fanout_leaf;
 	for (i = 1; i < RCU_NUM_LVLS; i++)
-		rcu_capacity[i] = rcu_capacity[i - 1] * RCU_FANOUT;
+		rcu_capacity[i] = rcu_capacity[i - 1] * RCU_FANOUT;	/// Node number of each rcu node tree level
 
 	/*
 	 * The tree must be able to accommodate the configured number of CPUs.

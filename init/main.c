@@ -534,7 +534,7 @@ void __init __weak arch_call_rest_init(void)
 	rest_init();
 }
 
-asmlinkage __visible void __init start_kernel(void)
+asmlinkage __visible void __init start_kernel(void)	/// Still using early_top_pgt
 {
 	char *command_line;
 	char *after_dashes;

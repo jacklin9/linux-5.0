@@ -115,7 +115,7 @@ __early_ioremap(resource_size_t phys_addr, unsigned long size, pgprot_t prot)
 
 	slot = -1;
 	for (i = 0; i < FIX_BTMAPS_SLOTS; i++) {	/// Each slot has NR_FIX_BTMAPS(64) entries (each entry point to a page)
-		if (!prev_map[i]) {
+		if (!prev_map[i]) {	/// Is slot occupied
 			slot = i;
 			break;
 		}

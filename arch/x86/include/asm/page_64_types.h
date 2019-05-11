@@ -52,7 +52,7 @@
 #define __PAGE_OFFSET           __PAGE_OFFSET_BASE_L4
 #endif /* CONFIG_DYNAMIC_MEMORY_LAYOUT */
 
-#define __START_KERNEL_map	_AC(0xffffffff80000000, UL)
+#define __START_KERNEL_map	_AC(0xffffffff80000000, UL)	/// Last 2GB is the kernel space
 
 /* See Documentation/x86/x86_64/mm.txt for a description of the memory map. */
 

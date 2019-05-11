@@ -40,7 +40,7 @@ void __init early_init_dt_add_memory_arch(u64 base, u64 size)
 	BUG();
 }
 
-void __init add_dtb(u64 data)
+void __init add_dtb(u64 data)	/// data is physical addr
 {
 	initial_dtb = data + offsetof(struct setup_data, data);
 }
