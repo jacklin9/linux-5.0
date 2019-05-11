@@ -497,7 +497,7 @@ void load_percpu_segment(int cpu)
 	loadsegment(fs, __KERNEL_PERCPU);
 #else
 	__loadsegment_simple(gs, 0);
-	wrmsrl(MSR_GS_BASE, cpu_kernelmode_gs_base(cpu));
+	wrmsrl(MSR_GS_BASE, cpu_kernelmode_gs_base(cpu));	/// Set GS base to be kernel stack addr
 #endif
 	load_stack_canary_segment();
 }
@@ -551,7 +551,7 @@ void switch_to_new_gdt(int cpu)
 	/* Load the original GDT */
 	load_direct_gdt(cpu);
 	/* Reload the per-cpu base */
-	load_percpu_segment(cpu);
+	load_percpu_segment(cpu);	/// Move kernel stack starting addr to gs
 }
 
 static const struct cpu_dev *cpu_devs[X86_VENDOR_NUM] = {};

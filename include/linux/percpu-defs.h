@@ -374,7 +374,7 @@ static inline void __this_cpu_preempt_check(const char *op) { }
 do {									\
 	__verify_pcpu_ptr(&(variable));					\
 	switch(sizeof(variable)) {					\
-		case 1: stem##1(variable, __VA_ARGS__);break;		\
+		case 1: stem##1(variable, __VA_ARGS__);break;		\	/// this_cpu_write_1
 		case 2: stem##2(variable, __VA_ARGS__);break;		\
 		case 4: stem##4(variable, __VA_ARGS__);break;		\
 		case 8: stem##8(variable, __VA_ARGS__);break;		\

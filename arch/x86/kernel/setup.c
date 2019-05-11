@@ -1220,7 +1220,7 @@ void __init setup_arch(char **cmdline_p)
 
 	tboot_probe();
 
-	map_vsyscall();
+	map_vsyscall();	/// System call implementation in user space
 
 	generic_apic_probe();
 
