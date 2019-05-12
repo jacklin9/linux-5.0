@@ -143,8 +143,9 @@ Initialization Explained
 18. PAGE MAPPING: in setup_arch, call early_ioremap_init:
 	1. Call early_ioremap_setup to to init slot_virt array which stores starting virtual address of each fix slot (8 slots, each slot have 64 pages)
 	2. Clean up statically allocated page bm_pte and install the page bm_pte to an pmd entry according to the starting virtual addr of fixmap
-19. MEM MANAGE: in setup_arch, call e820__memory_setup to copy e820 table to e820_table and resolve overlap and type conflicts. The function also copies e820_table to e820_table_kexec and e820_table_firmware
+19. MEM MANAGE: in setup_arch, call e820__memory_setup to copy e820 table to e820_table and resolve overlap and type conflicts, and add regions in e820_table to memblock.memory. The function also copies e820_table to e820_table_kexec and e820_table_firmware
 20. MEM MANAGE: in setup_arch, init init_mm from line 925 to 930
 21. CONFIG: in setup_arch, call parse_early_param to init all variables with early = true registered by macro early_param
 22. MEM MANAGE: in setup_arch, call memblock_x86_reserve_range_setup_data to add ranges used by setup_data in boot params to memblock.reserved
-23. 
+23. MEM MANAGE: in setup_arch, call e820__reserve_setup_data to add ranges used by setup_data in boot params to e820_table, e820_table_kexec
+24. TIME: in setup_arch, call tsc_early_init to initialize cpu_khz and tsc_khz, loops_per_jiffy 

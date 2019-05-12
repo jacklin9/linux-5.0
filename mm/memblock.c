@@ -187,7 +187,7 @@ __memblock_find_range_bottom_up(phys_addr_t start, phys_addr_t end,
 	phys_addr_t this_start, this_end, cand;
 	u64 i;
 
-	for_each_free_mem_range(i, nid, flags, &this_start, &this_end, NULL) {
+	for_each_free_mem_range(i, nid, flags, &this_start, &this_end, NULL) {	/// i is like an iterator
 		this_start = clamp(this_start, start, end);	/// Make this_start in [start, end]
 		this_end = clamp(this_end, start, end);
 
@@ -445,12 +445,12 @@ static int __init_memblock memblock_double_array(struct memblock_type *type,
 	 * This should however not be an issue for now, as we currently only
 	 * call into MEMBLOCK while it's still active, or much later when slab
 	 * is active for memory hotplug operations
-	 */
+	 */	/// bootmem is another early mem allocation mechanism
 	if (use_slab) {
 		new_array = kmalloc(new_size, GFP_KERNEL);
 		addr = new_array ? __pa(new_array) : 0;
 	} else {
-		/* only exclude range when trying to double reserved.regions */
+		/* only exclude range when trying to double reserved.regions */	/// Recursive, haha!!!
 		if (type != &memblock.reserved)
 			new_area_start = new_area_size = 0;
 
@@ -1025,7 +1025,7 @@ void __init_memblock __next_mem_range(u64 *idx, int nid,
 		if (!(flags & MEMBLOCK_NOMAP) && memblock_is_nomap(m))
 			continue;
 
-		if (!type_b) {
+		if (!type_b) {	/// No reserved mem region
 			if (out_start)
 				*out_start = m_start;
 			if (out_end)
@@ -1052,7 +1052,7 @@ void __init_memblock __next_mem_range(u64 *idx, int nid,
 			 * if idx_b advanced past idx_a,
 			 * break out to advance idx_a
 			 */
-			if (r_start >= m_end)
+			if (r_start >= m_end)	/// Available range does not overlap with regions split by reserved regions
 				break;
 			/* if the two regions intersect, we're done */
 			if (m_start < r_end) {
