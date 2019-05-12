@@ -1142,7 +1142,7 @@ void __init early_cpu_init(void)
 #endif
 
 	for (cdev = __x86_cpu_dev_start; cdev < __x86_cpu_dev_end; cdev++) {	/// Defined by macro cpu_dev_register
-		const struct cpu_dev *cpudev = *cdev;								/// adm_cpu_dev, intel_cpu_dev
+		const struct cpu_dev *cpudev = *cdev;								/// amd_cpu_dev, intel_cpu_dev
 
 		if (count >= X86_VENDOR_NUM)
 			break;

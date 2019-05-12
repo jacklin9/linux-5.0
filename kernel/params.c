@@ -161,14 +161,14 @@ static int parse_one(char *param,
 }
 
 /* Args looks like "foo=bar,bar2 baz=fuz wiz". */
-char *parse_args(const char *doing,
-		 char *args,
-		 const struct kernel_param *params,
-		 unsigned num,
-		 s16 min_level,
-		 s16 max_level,
-		 void *arg,
-		 int (*unknown)(char *param, char *val,
+char *parse_args(const char *doing,	/// = "early options"
+		 char *args,				/// = cmdline
+		 const struct kernel_param *params,	/// = NULL
+		 unsigned num,	/// = 0
+		 s16 min_level,	/// = 0
+		 s16 max_level,	/// = 0
+		 void *arg,	/// = NULL
+		 int (*unknown)(char *param, char *val,	/// = do_early_param
 				const char *doing, void *arg))
 {
 	char *param, *val, *err = NULL;

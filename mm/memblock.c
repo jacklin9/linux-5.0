@@ -188,7 +188,7 @@ __memblock_find_range_bottom_up(phys_addr_t start, phys_addr_t end,
 	u64 i;
 
 	for_each_free_mem_range(i, nid, flags, &this_start, &this_end, NULL) {
-		this_start = clamp(this_start, start, end);
+		this_start = clamp(this_start, start, end);	/// Make this_start in [start, end]
 		this_end = clamp(this_end, start, end);
 
 		cand = round_up(this_start, align);
@@ -454,8 +454,8 @@ static int __init_memblock memblock_double_array(struct memblock_type *type,
 		if (type != &memblock.reserved)
 			new_area_start = new_area_size = 0;
 
-		addr = memblock_find_in_range(new_area_start + new_area_size,
-						memblock.current_limit,
+		addr = memblock_find_in_range(new_area_start + new_area_size,	/// Start addr of allocatable mem
+						memblock.current_limit,	/// No limit now
 						new_alloc_size, PAGE_SIZE);
 		if (!addr && new_area_size)
 			addr = memblock_find_in_range(0,
@@ -489,7 +489,7 @@ static int __init_memblock memblock_double_array(struct memblock_type *type,
 	if (*in_slab)
 		kfree(old_array);
 	else if (old_array != memblock_memory_init_regions &&
-		 old_array != memblock_reserved_init_regions)
+		 old_array != memblock_reserved_init_regions)	/// If previous array is not statically allocated
 		memblock_free(__pa(old_array), old_alloc_size);
 
 	/*

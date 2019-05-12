@@ -126,7 +126,7 @@ enum fixed_addresses {	/// Each index represents 1 page. In reverse order: FIX_H
 	 */
 #define NR_FIX_BTMAPS		64	/// BTMAPS: boot-time maps. used by early_ioremap
 #define FIX_BTMAPS_SLOTS	8	/// Totally FIX_BTMAPS_SLOTS, each slot has NR_FIX_BTMAPS entries
-#define TOTAL_FIX_BTMAPS	(NR_FIX_BTMAPS * FIX_BTMAPS_SLOTS)	/// In bytes
+#define TOTAL_FIX_BTMAPS	(NR_FIX_BTMAPS * FIX_BTMAPS_SLOTS)	/// In page
 	FIX_BTMAP_END =	/// First comes FIX_BTMAP_END, and then FIX_BTMAP_BEGIN
 	 (__end_of_permanent_fixed_addresses ^
 	  (__end_of_permanent_fixed_addresses + TOTAL_FIX_BTMAPS - 1)) &

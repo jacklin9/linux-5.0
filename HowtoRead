@@ -120,3 +120,31 @@ ABOUT KBUILD
 11. Interrupt handler is initialzed in function init_IRQ. The function calls x86_init.irqs.intr_init, which is actually native_init_IRQ. This function calls idt_setup_apic_and_irq_gates. This function fill idt_table with table apic_idts and table irq_entries_start
 
 12. When kernel init is almost done, kernel create a kernel thread running kernel_init, and another kernel thread running kthreadd, and jump to do_idle
+
+Initialization Explained
+1. KERNEL STACK: at arch/x86/kernel/head_64.S:77, set stack to be the end of init task kernel stack
+2. PAGE MAPPING: in function __startup_64, use early_top_pgt to set up kernel virtual addr space mapping and identical mapping of physical mem used by kernel. In kernel virtual addr mapping, pages used by all other levels are statically allocated; in identical mapping, allocate pages in early_dynamic_pgts pool which is in section .init.data
+3. KERNEL STACK: at arch/x86/kernel/head_64.S:171, set stack to be the end of init task kernel stack again
+4. PAGE MAPPING: set gdt by using early_gdt_descr which points to per-cpu gdt
+5. PAGE MAPPING: in function __x86_64_start_kernel, call reset_early_page_tables to clear the identical mapping and reset early_dynamic_pgts pool
+6. PAGE MAPPING: in function __x86_64_start_kernel, call clear_page to clear init_top_pgt
+7. KASAN & PAGE MAPPING: in function __x86_64_start_kernel, call kasan_early_init to add statically allocated page kasan_early_shadow_page to both early_top_pgt and init_top_gdt
+8. IDT: in function __x86_64_start_kernel, call idt_setup_early_handler to fill idt_table with early_idt_handler_array which processes page fault exception seariously and ignores other exceptions (calls early_fixup_exception)
+9. PAGE MAPPING: at __x86_64_start_kernel:465, fill init_top_gdt with kernel virtual addr mapping
+10. KERNEL STACK: in start_kernel, call set_task_stack_end_magic to fill the end of init task kernel stack with stack protector value 
+11. DEBUG: in start_kernel, call debug_objects_early_init to init obj_hash which is a hashlist of debug_obj, and init linked list obj_pool by adding debug_obj in obj_static_pool
+12. CGROUP: in start_kernel, call cgroup_init_early to init cgrp_dfl_root(cgroup tree root) and cgroup_subsys(subsys list)
+13. IDT: at start_kernel:548, disable IRQ
+14. SMP: in startup_kernel, call boot_cpu_init to mark boot CPU online, active, present, possible
+15. MEM MANAGE: in setup_arch, call memblock_reserve to add mem region occupied by kernel to memblock.reserved
+16. MEM MANAGE: in setup_arch, call memblock_reserve to add first page to memblock.reserved
+16. MEM MANAGE: in setup_arch, call early_reserve_initrd to add initrd to memblock.reserved
+17. IDT: in setup_arch, call idt_setup_early_traps to fill idt_table with entries in table early_idts. This table contains 2 entries, one(entry debug) for handling debug exception, the other(entry int3) for handling breakpoint exception
+18. PAGE MAPPING: in setup_arch, call early_ioremap_init:
+	1. Call early_ioremap_setup to to init slot_virt array which stores starting virtual address of each fix slot (8 slots, each slot have 64 pages)
+	2. Clean up statically allocated page bm_pte and install the page bm_pte to an pmd entry according to the starting virtual addr of fixmap
+19. MEM MANAGE: in setup_arch, call e820__memory_setup to copy e820 table to e820_table and resolve overlap and type conflicts. The function also copies e820_table to e820_table_kexec and e820_table_firmware
+20. MEM MANAGE: in setup_arch, init init_mm from line 925 to 930
+21. CONFIG: in setup_arch, call parse_early_param to init all variables with early = true registered by macro early_param
+22. MEM MANAGE: in setup_arch, call memblock_x86_reserve_range_setup_data to add ranges used by setup_data in boot params to memblock.reserved
+23. 
