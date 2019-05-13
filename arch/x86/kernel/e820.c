@@ -107,7 +107,7 @@ static struct e820_entry *__e820__mapped_all(u64 start, u64 end,
 			continue;
 
 		/* Is the region (part) in overlap with the current region? */
-		if (entry->addr >= end || entry->addr + entry->size <= start)
+		if (entry->addr >= end || entry->addr + entry->size <= start)	/// Not overlapped
 			continue;
 
 		/*
@@ -167,7 +167,7 @@ static void __init __e820__range_add(struct e820_table *table, u64 start, u64 si
 
 void __init e820__range_add(u64 start, u64 size, enum e820_type type)
 {
-	__e820__range_add(e820_table, start, size, type);
+	__e820__range_add(e820_table, start, size, type);	/// e820 is memory type table
 }
 
 static void __init e820_print_type(enum e820_type type)
@@ -313,8 +313,8 @@ int __init e820__update_table(struct e820_table *table)
 
 	/* Create pointers for initial change-point information (for sorting): */
 	for (i = 0; i < 2 * table->nr_entries; i++)
-		change_point[i] = &change_point_list[i];
-
+		change_point[i] = &change_point_list[i];	/// change_point is an array of pointers to change_member
+													/// change_point_list is an array of change_member
 	/*
 	 * Record all known change-points (starting and ending addresses),
 	 * omitting empty memory regions:
@@ -535,14 +535,14 @@ u64 __init e820__range_remove(u64 start, u64 size, enum e820_type old_type, bool
 		entry_end = entry->addr + entry->size;
 
 		/* Completely covered? */
-		if (entry->addr >= start && entry_end <= end) {
+		if (entry->addr >= start && entry_end <= end) {	/// This entry is covered by the range to be removed, so remove the entry
 			real_removed_size += entry->size;
 			memset(entry, 0, sizeof(*entry));
 			continue;
 		}
 
 		/* Is the new range completely covered? */
-		if (entry->addr < start && entry_end > end) {
+		if (entry->addr < start && entry_end > end) {	/// This entry covers the range to be removed, so the entry will be split to 2
 			e820__range_add(end, entry_end - end, entry->type);
 			entry->size = start - entry->addr;
 			real_removed_size += size;

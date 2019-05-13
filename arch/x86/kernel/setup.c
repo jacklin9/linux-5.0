@@ -254,14 +254,14 @@ void * __init extend_brk(size_t size, size_t align)
 	size_t mask = align - 1;
 	void *ret;
 
-	BUG_ON(_brk_start == 0);
+	BUG_ON(_brk_start == 0);	/// brk section is the last part of kernel. Initially _brk_start = _brk_end = _brk_base which is the start of brk section
 	BUG_ON(align & mask);
 
 	_brk_end = (_brk_end + mask) & ~mask;
-	BUG_ON((char *)(_brk_end + size) > __brk_limit);
+	BUG_ON((char *)(_brk_end + size) > __brk_limit);	/// Make sure brk not exceed end of kernel image
 
 	ret = (void *)_brk_end;
-	_brk_end += size;
+	_brk_end += size;	/// Enlarge brk
 
 	memset(ret, 0, size);
 
@@ -630,7 +630,7 @@ static __init void reserve_ibft_region(void)
 {
 	unsigned long addr, size = 0;
 
-	addr = find_ibft_region(&size);
+	addr = find_ibft_region(&size);	/// iSCSI Boot Format Table
 
 	if (size)
 		memblock_reserve(addr, size);
@@ -749,7 +749,7 @@ static void __init e820_add_kernel_range(void)
 	 * exclude kernel range. If we really are running on top non-RAM,
 	 * we will crash later anyways.
 	 */
-	if (e820__mapped_all(start, start + size, E820_TYPE_RAM))
+	if (e820__mapped_all(start, start + size, E820_TYPE_RAM))	/// Does e820 cover the kernel space
 		return;
 
 	pr_warn(".text .data .bss are not marked as E820_TYPE_RAM!\n");
@@ -1018,7 +1018,7 @@ void __init setup_arch(char **cmdline_p)
 	init_hypervisor_platform();
 
 	tsc_early_init();
-	x86_init.resources.probe_roms();
+	x86_init.resources.probe_roms();	/// Acutally call probe_roms
 
 	/* after parse_early_param, so could debug it */
 	insert_resource(&iomem_resource, &code_resource);	/// struct resource see include/linux/ioport.h
@@ -1026,7 +1026,7 @@ void __init setup_arch(char **cmdline_p)
 	insert_resource(&iomem_resource, &bss_resource);
 
 	e820_add_kernel_range();
-	trim_bios_range();
+	trim_bios_range();	/// Make sure 1st page is served, [640K, 1M) is removed. And sanitize e820_table (memory type table)
 #ifdef CONFIG_X86_32
 	if (ppro_with_ram_bug()) {
 		e820__range_update(0x70000000ULL, 0x40000ULL, E820_TYPE_RAM,
@@ -1036,7 +1036,7 @@ void __init setup_arch(char **cmdline_p)
 		e820__print_table("bad_ppro");
 	}
 #else
-	early_gart_iommu_check();
+	early_gart_iommu_check();	/// GART: Graphics Address Remapping Table
 #endif
 
 	/*
@@ -1099,7 +1099,7 @@ void __init setup_arch(char **cmdline_p)
 
 	cleanup_highmap();
 
-	memblock_set_current_limit(ISA_END_ADDRESS);
+	memblock_set_current_limit(ISA_END_ADDRESS);	/// 1M
 	e820__memblock_setup();
 
 	reserve_bios_regions();

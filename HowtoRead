@@ -121,7 +121,7 @@ ABOUT KBUILD
 
 12. When kernel init is almost done, kernel create a kernel thread running kernel_init, and another kernel thread running kthreadd, and jump to do_idle
 
-Initialization Explained
+Initialization Process Explained
 1. KERNEL STACK: at arch/x86/kernel/head_64.S:77, set stack to be the end of init task kernel stack
 2. PAGE MAPPING: in function __startup_64, use early_top_pgt to set up kernel virtual addr space mapping and identical mapping of physical mem used by kernel. In kernel virtual addr mapping, pages used by all other levels are statically allocated; in identical mapping, allocate pages in early_dynamic_pgts pool which is in section .init.data
 3. KERNEL STACK: at arch/x86/kernel/head_64.S:171, set stack to be the end of init task kernel stack again
@@ -149,3 +149,8 @@ Initialization Explained
 22. MEM MANAGE: in setup_arch, call memblock_x86_reserve_range_setup_data to add ranges used by setup_data in boot params to memblock.reserved
 23. MEM MANAGE: in setup_arch, call e820__reserve_setup_data to add ranges used by setup_data in boot params to e820_table, e820_table_kexec
 24. TIME: in setup_arch, call tsc_early_init to initialize cpu_khz and tsc_khz, loops_per_jiffy 
+25. MEM MANAGE: in setup_arch, call e820_add_kernel_range to make sure physical mem used by kernel is covered by e820_table and marked as ram. If not, remove the kernel range from e820_table and add it to the table again. Then setup_arch calls trim_bios_range to make sure first page is reserved in e820_table, [640k, 1M] is not in e820_table. trim_bios_range also call e820__update_table to sanitize the table
+26. MEM MANAGE: in setup_arch, call early_gart_iommu_check to detect graphical card mem and add it to e820_table as reserved mem and then sanitize the e820_table
+27. SMP & MEM MANAGE: in setup_arch, call find_smp_config to find the addr of smp config table, store the addr to mpf_base, and reserve mem of the table (add the region to memblock.reserved)
+28. PAGE MAPPING & MEM MANAGE: in setup_arch, call early_alloc_pgt_buf to enlarge brk section and init pgt_buf_start, pgt_buf_end to the start of brk, and pgt_buf_top to end of the enlarged brk. then call reserve_brk to put the enlarged brk region to memblock.reserved
+29. MEM MANAGE: in setup_arch, call memblock_set_current_limit to set memblock.current_limit to 1M

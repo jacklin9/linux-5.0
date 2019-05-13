@@ -630,9 +630,9 @@ void __init default_find_smp_config(void)
 	 * 2) Scan the top 1K of base RAM
 	 * 3) Scan the 64K of bios
 	 */
-	if (smp_scan_config(0x0, 0x400) ||
-	    smp_scan_config(639 * 0x400, 0x400) ||
-	    smp_scan_config(0xF0000, 0x10000))
+	if (smp_scan_config(0x0, 0x400) ||	/// [0, 1K)
+	    smp_scan_config(639 * 0x400, 0x400) ||	/// [639K, 640K)
+	    smp_scan_config(0xF0000, 0x10000))	/// [960K, 1M)
 		return;
 	/*
 	 * If it is an SMP machine we should know now, unless the

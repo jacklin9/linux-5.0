@@ -121,7 +121,7 @@ static u32 __init allocate_aperture(void)
 
 
 /* Find a PCI capability */
-static u32 __init find_cap(int bus, int slot, int func, int cap)
+static u32 __init find_cap(int bus, int slot, int func, int cap)	/// cap = 0x02
 {
 	int bytes;
 	u8 pos;
@@ -135,10 +135,10 @@ static u32 __init find_cap(int bus, int slot, int func, int cap)
 		u8 id;
 
 		pos &= ~3;
-		id = read_pci_config_byte(bus, slot, func, pos+PCI_CAP_LIST_ID);
+		id = read_pci_config_byte(bus, slot, func, pos+PCI_CAP_LIST_ID);	/// Get cap id
 		if (id == 0xff)
 			break;
-		if (id == cap)
+		if (id == cap)	/// Find the cap
 			return pos;
 		pos = read_pci_config_byte(bus, slot, func,
 						pos+PCI_CAP_LIST_NEXT);
@@ -226,7 +226,7 @@ static u32 __init search_agp_bridge(u32 *order, int *valid_agp)
 				u32 class, cap;
 				u8 type;
 				class = read_pci_config(bus, slot, func,
-							PCI_CLASS_REVISION);
+							PCI_CLASS_REVISION);	/// Get class
 				if (class == 0xffffffff)
 					break;
 
