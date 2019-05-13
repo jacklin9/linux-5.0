@@ -1130,7 +1130,7 @@ void __init setup_arch(char **cmdline_p)
 
 	reserve_real_mode();
 
-	trim_platform_memory_ranges();
+	trim_platform_memory_ranges();	/// Move some machine specific mem ranges to memblock.reserve
 	trim_low_memory_range();
 
 	init_mem_mapping();

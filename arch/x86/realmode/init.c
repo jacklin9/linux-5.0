@@ -27,7 +27,7 @@ void __init set_real_mode_mem(phys_addr_t mem, size_t size)
 void __init reserve_real_mode(void)
 {
 	phys_addr_t mem;
-	size_t size = real_mode_size_needed();
+	size_t size = real_mode_size_needed();	/// Real mode blob size
 
 	if (!size)
 		return;

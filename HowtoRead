@@ -143,7 +143,7 @@ Initialization Process Explained
 18. PAGE MAPPING: in setup_arch, call early_ioremap_init:
 	1. Call early_ioremap_setup to to init slot_virt array which stores starting virtual address of each fix slot (8 slots, each slot have 64 pages)
 	2. Clean up statically allocated page bm_pte and install the page bm_pte to an pmd entry according to the starting virtual addr of fixmap
-19. MEM MANAGE: in setup_arch, call e820__memory_setup to copy e820 table to e820_table and resolve overlap and type conflicts, and add regions in e820_table to memblock.memory. The function also copies e820_table to e820_table_kexec and e820_table_firmware
+19. MEM MANAGE: in setup_arch, call e820__memory_setup to copy e820 table to e820_table and resolve overlap and type conflicts. The function also copies e820_table to e820_table_kexec and e820_table_firmware
 20. MEM MANAGE: in setup_arch, init init_mm from line 925 to 930
 21. CONFIG: in setup_arch, call parse_early_param to init all variables with early = true registered by macro early_param
 22. MEM MANAGE: in setup_arch, call memblock_x86_reserve_range_setup_data to add ranges used by setup_data in boot params to memblock.reserved
@@ -154,3 +154,5 @@ Initialization Process Explained
 27. SMP & MEM MANAGE: in setup_arch, call find_smp_config to find the addr of smp config table, store the addr to mpf_base, and reserve mem of the table (add the region to memblock.reserved)
 28. PAGE MAPPING & MEM MANAGE: in setup_arch, call early_alloc_pgt_buf to enlarge brk section and init pgt_buf_start, pgt_buf_end to the start of brk, and pgt_buf_top to end of the enlarged brk. then call reserve_brk to put the enlarged brk region to memblock.reserved
 29. MEM MANAGE: in setup_arch, call memblock_set_current_limit to set memblock.current_limit to 1M
+30. MEM MANAGE: in setup_arch, call e820__memblock_setup to allow changing memblock.memory and memblock.reserved size, and add ram regions and kernel mem region in e820_table to memblock.memory. Then call reserve_bios_regions to add bios mem to memblock.reserved
+31. MEM MANAGE: in setup_arch, call reserve_real_mode to figure out the size of real mode blob and allocate mem under 1M, put the region to memblock.reserved, and set real_mode_header to the beginning of the region. Then call trim_platform_memory_ranges and trim_low_memory_range to add some special mem ranges to memblock.reserved
