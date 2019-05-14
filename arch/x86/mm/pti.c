@@ -83,7 +83,7 @@ enum pti_mode {
 	PTI_FORCE_ON
 } pti_mode;
 
-void __init pti_check_boottime_disable(void)
+void __init pti_check_boottime_disable(void)	/// Determine PTI status
 {
 	char arg[5];
 	int ret;
