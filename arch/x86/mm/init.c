@@ -678,7 +678,7 @@ void __init init_mem_mapping(void)
 		 * as soon as possible. And then use page tables allocated above
 		 * the kernel to map [ISA_END_ADDRESS, kernel_end).
 		 */
-		memory_map_bottom_up(kernel_end, end);
+		memory_map_bottom_up(kernel_end, end);	/// kernel_end is the phy addr of kernel end, end is the end of phy mem
 		memory_map_bottom_up(ISA_END_ADDRESS, kernel_end);
 	} else {
 		memory_map_top_down(ISA_END_ADDRESS, end);

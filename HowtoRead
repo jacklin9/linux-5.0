@@ -130,7 +130,7 @@ Initialization Process Explained
 6. PAGE MAPPING: in function __x86_64_start_kernel, call clear_page to clear init_top_pgt
 7. KASAN & PAGE MAPPING: in function __x86_64_start_kernel, call kasan_early_init to add statically allocated page kasan_early_shadow_page to both early_top_pgt and init_top_gdt
 8. IDT: in function __x86_64_start_kernel, call idt_setup_early_handler to fill idt_table with early_idt_handler_array which processes page fault exception seariously and ignores other exceptions (calls early_fixup_exception)
-9. PAGE MAPPING: at __x86_64_start_kernel:465, fill init_top_gdt with kernel virtual addr mapping
+9. PAGE MAPPING: at x86_64_start_kernel:465, fill init_top_gdt with kernel virtual addr mapping
 10. KERNEL STACK: in start_kernel, call set_task_stack_end_magic to fill the end of init task kernel stack with stack protector value 
 11. DEBUG: in start_kernel, call debug_objects_early_init to init obj_hash which is a hashlist of debug_obj, and init linked list obj_pool by adding debug_obj in obj_static_pool
 12. CGROUP: in start_kernel, call cgroup_init_early to init cgrp_dfl_root(cgroup tree root) and cgroup_subsys(subsys list)
@@ -156,4 +156,5 @@ Initialization Process Explained
 29. MEM MANAGE: in setup_arch, call memblock_set_current_limit to set memblock.current_limit to 1M
 30. MEM MANAGE: in setup_arch, call e820__memblock_setup to allow changing memblock.memory and memblock.reserved size, and add ram regions and kernel mem region in e820_table to memblock.memory. Then call reserve_bios_regions to add bios mem to memblock.reserved
 31. MEM MANAGE: in setup_arch, call reserve_real_mode to figure out the size of real mode blob and allocate mem under 1M, put the region to memblock.reserved, and set real_mode_header to the beginning of the region. Then call trim_platform_memory_ranges and trim_low_memory_range to add some special mem ranges to memblock.reserved
-32. PAGE MAPPING: in setup_arch, call init_mem_mapping to set pti_mode and cpu capability(like PSE, PEG, in function pti_check_boottime_disable), set page_size_mask(in function probe_page_size_mask), set PCID(in function setup_pcid).
+32. PAGE MAPPING: in setup_arch, call init_mem_mapping to set pti_mode and cpu capability(like PSE, PEG, in function pti_check_boottime_disable), set page_size_mask(in function probe_page_size_mask), set PCID(in function setup_pcid), map phy addr [0, 1M) to [PAGE_OFFSET, PAGE_OFFSET + 1M) in init_mm.pgd that is swapper_pg_dir which is defined as init_top_pgt(in function init_memory_mapping), set trampoline_pgd_entry(in function init_trampoline), map phy addr [1M, kernel_end) and [kenrel_end, mem end)(by calling function memory_map_bottom_up)
+33. IDT: in setup_arch, call idt_setup_early_pf to set X86_TRAP_PF entry in idt_table to be function page_fault
