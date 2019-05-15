@@ -177,9 +177,9 @@ static void __init probe_page_size_mask(void)
 	 * large pages into small in interrupt context, etc.
 	 */
 	if (boot_cpu_has(X86_FEATURE_PSE) && !debug_pagealloc_enabled())
-		page_size_mask |= 1 << PG_LEVEL_2M;
+		page_size_mask |= 1 << PG_LEVEL_2M;	/// Support 3 page sizes: 1. 4K; 2. 2M(when PMD entry pse flag is on); 3. 1G(when PUD entry pse flag is on)
 	else
-		direct_gbpages = 0;
+		direct_gbpages = 0;	/// 1GB page is disabled
 
 	/* Enable PSE if available */
 	if (boot_cpu_has(X86_FEATURE_PSE))
@@ -332,7 +332,7 @@ static const char *page_size_string(struct map_range *mr)
 
 static int __meminit split_mem_range(struct map_range *mr, int nr_range,
 				     unsigned long start,
-				     unsigned long end)
+				     unsigned long end)	/// First try to round up to 2M, then try to round up to 1G
 {
 	unsigned long start_pfn, end_pfn, limit_pfn;
 	unsigned long pfn;
@@ -341,7 +341,7 @@ static int __meminit split_mem_range(struct map_range *mr, int nr_range,
 	limit_pfn = PFN_DOWN(end);
 
 	/* head if not big page alignment ? */
-	pfn = start_pfn = PFN_DOWN(start);
+	pfn = start_pfn = PFN_DOWN(start);	/// Round down to 4K align
 #ifdef CONFIG_X86_32
 	/*
 	 * Don't use a large page for the first 2/4MB of memory
@@ -354,21 +354,22 @@ static int __meminit split_mem_range(struct map_range *mr, int nr_range,
 	else
 		end_pfn = round_up(pfn, PFN_DOWN(PMD_SIZE));
 #else /* CONFIG_X86_64 */
-	end_pfn = round_up(pfn, PFN_DOWN(PMD_SIZE));
+	end_pfn = round_up(pfn, PFN_DOWN(PMD_SIZE));	/// PMD_SIZE: 2M. PFN_DOWN(...): 2^9. Round the pfn up to 2^9 align (2M)
 #endif
+	/// Now start_pfn is rounddown of start align at 4K, end_pfn is roundup of start align at 2M
 	if (end_pfn > limit_pfn)
 		end_pfn = limit_pfn;
 	if (start_pfn < end_pfn) {
 		nr_range = save_mr(mr, nr_range, start_pfn, end_pfn, 0);
-		pfn = end_pfn;
+		pfn = end_pfn;	/// pfn always points to next page to be mapped
 	}
 
 	/* big page (2M) range */
-	start_pfn = round_up(pfn, PFN_DOWN(PMD_SIZE));
+	start_pfn = round_up(pfn, PFN_DOWN(PMD_SIZE));	/// start_pfn should already been 2M algined
 #ifdef CONFIG_X86_32
 	end_pfn = round_down(limit_pfn, PFN_DOWN(PMD_SIZE));
 #else /* CONFIG_X86_64 */
-	end_pfn = round_up(pfn, PFN_DOWN(PUD_SIZE));
+	end_pfn = round_up(pfn, PFN_DOWN(PUD_SIZE));	/// PUD_SIZE is 1G
 	if (end_pfn > round_down(limit_pfn, PFN_DOWN(PMD_SIZE)))
 		end_pfn = round_down(limit_pfn, PFN_DOWN(PMD_SIZE));
 #endif
@@ -464,7 +465,7 @@ bool pfn_range_is_mapped(unsigned long start_pfn, unsigned long end_pfn)
  * the physical memory. To access them they are temporarily mapped.
  */
 unsigned long __ref init_memory_mapping(unsigned long start,
-					       unsigned long end)
+					       unsigned long end)	/// These are physical addr range
 {
 	struct map_range mr[NR_RANGE_MR];
 	unsigned long ret = 0;
