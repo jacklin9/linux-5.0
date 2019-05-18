@@ -475,7 +475,7 @@ unsigned long __ref init_memory_mapping(unsigned long start,
 	       start, end - 1);
 
 	memset(mr, 0, sizeof(mr));
-	nr_range = split_mem_range(mr, 0, start, end);
+	nr_range = split_mem_range(mr, 0, start, end);	/// Split [start, end) into different regions 
 
 	for (i = 0; i < nr_range; i++)
 		ret = kernel_physical_mapping_init(mr[i].start, mr[i].end,
@@ -653,9 +653,9 @@ void __init init_mem_mapping(void)
 	setup_pcid();	/// Process Context ID: CPU feature to avoid TLB flush
 
 #ifdef CONFIG_X86_64
-	end = max_pfn << PAGE_SHIFT;
+	end = max_pfn << PAGE_SHIFT;	/// In 64 bit mode, end is the end of physical mem
 #else
-	end = max_low_pfn << PAGE_SHIFT;
+	end = max_low_pfn << PAGE_SHIFT;	/// In 32 bit mode, end is the end of low mem
 #endif
 
 	/* the ISA range is always mapped regardless of memory holes */
