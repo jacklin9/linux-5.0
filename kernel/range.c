@@ -41,7 +41,7 @@ int add_range_with_merge(struct range *range, int az, int nr_range,
 			continue;
 
 		common_start = max(range[i].start, start);
-		common_end = min(range[i].end, end);
+		common_end = min(range[i].end, end);	/// Find the overlapped part [common_start, common_end)
 		if (common_start > common_end)
 			continue;
 

@@ -85,19 +85,19 @@ static bool __initdata can_use_brk_pgt = true;
  *
  * for detailed information.
  */
-__ref void *alloc_low_pages(unsigned int num)
+__ref void *alloc_low_pages(unsigned int num)	/// Get num pages
 {
 	unsigned long pfn;
 	int i;
 
-	if (after_bootmem) {
+	if (after_bootmem) {	/// Early mem init stage has been passed
 		unsigned int order;
 
 		order = get_order((unsigned long)num << PAGE_SHIFT);
 		return (void *)__get_free_pages(GFP_ATOMIC | __GFP_ZERO, order);
 	}
 
-	if ((pgt_buf_end + num) > pgt_buf_top || !can_use_brk_pgt) {
+	if ((pgt_buf_end + num) > pgt_buf_top || !can_use_brk_pgt) {	/// If brk section can not be used, use memblock
 		unsigned long ret = 0;
 
 		if (min_pfn_mapped < max_pfn_mapped) {
@@ -373,7 +373,7 @@ static int __meminit split_mem_range(struct map_range *mr, int nr_range,
 	if (end_pfn > round_down(limit_pfn, PFN_DOWN(PMD_SIZE)))
 		end_pfn = round_down(limit_pfn, PFN_DOWN(PMD_SIZE));
 #endif
-
+	/// Now start_pfn is the first page frame in the range that is 2M aligned, and end_pfn is the first aligned at 1G
 	if (start_pfn < end_pfn) {
 		nr_range = save_mr(mr, nr_range, start_pfn, end_pfn,
 				page_size_mask & (1<<PG_LEVEL_2M));
@@ -384,6 +384,7 @@ static int __meminit split_mem_range(struct map_range *mr, int nr_range,
 	/* big page (1G) range */
 	start_pfn = round_up(pfn, PFN_DOWN(PUD_SIZE));
 	end_pfn = round_down(limit_pfn, PFN_DOWN(PUD_SIZE));
+	/// Now start_pfn is the first page frame in the range that is 1G aligned, and end_pfn is the last aligned at 1G
 	if (start_pfn < end_pfn) {
 		nr_range = save_mr(mr, nr_range, start_pfn, end_pfn,
 				page_size_mask &
@@ -464,6 +465,9 @@ bool pfn_range_is_mapped(unsigned long start_pfn, unsigned long end_pfn)
  * This runs before bootmem is initialized and gets pages directly from
  * the physical memory. To access them they are temporarily mapped.
  */
+/// In 64 bit mode 2 mappings are set: the first is the direct mapping of [phy addr of kernel,  +1G) to 
+/// [START_KERNEL-map, +1G), the second is the mapping of [0, phy mem end) to [PAGE_OFFSET, + phy mem end)
+/// So here the kernel assumes phy mem is no more than 2^64 - PAGE_OFFSET
 unsigned long __ref init_memory_mapping(unsigned long start,
 					       unsigned long end)	/// These are physical addr range
 {

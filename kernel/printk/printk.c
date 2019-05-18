@@ -432,7 +432,7 @@ static u32 clear_idx;
 #define LOG_ALIGN __alignof__(struct printk_log)
 #define __LOG_BUF_LEN (1 << CONFIG_LOG_BUF_SHIFT)
 #define LOG_BUF_LEN_MAX (u32)(1 << 31)
-static char __log_buf[__LOG_BUF_LEN] __aligned(LOG_ALIGN);
+static char __log_buf[__LOG_BUF_LEN] __aligned(LOG_ALIGN);	/// Initial log buffer
 static char *log_buf = __log_buf;
 static u32 log_buf_len = __LOG_BUF_LEN;
 
@@ -1089,7 +1089,7 @@ static void __init log_buf_add_cpu(void)
 	if (num_possible_cpus() == 1)
 		return;
 
-	cpu_extra = (num_possible_cpus() - 1) * __LOG_CPU_MAX_BUF_LEN;
+	cpu_extra = (num_possible_cpus() - 1) * __LOG_CPU_MAX_BUF_LEN;	/// Extra log buffer len
 
 	/* by default this will only continue through for large > 64 CPUs */
 	if (cpu_extra <= __LOG_BUF_LEN / 2)

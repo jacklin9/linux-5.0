@@ -353,7 +353,7 @@ static void __init early_reserve_initrd(void)
 static void __init reserve_initrd(void)
 {
 	/* Assume only end is not page aligned */
-	u64 ramdisk_image = get_ramdisk_image();
+	u64 ramdisk_image = get_ramdisk_image();	/// Physical addr of initrd disk
 	u64 ramdisk_size  = get_ramdisk_size();
 	u64 ramdisk_end   = PAGE_ALIGN(ramdisk_image + ramdisk_size);
 	u64 mapped_size;
@@ -1179,7 +1179,7 @@ void __init setup_arch(char **cmdline_p)
 
 	acpi_table_upgrade();
 
-	vsmp_init();
+	vsmp_init();	/// ScaleMP vSMP (Vertile SMP)
 
 	io_delay_init();
 

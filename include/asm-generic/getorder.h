@@ -46,7 +46,7 @@ int __get_order(unsigned long size)
  *
  * This function may be used to initialise variables with compile time
  * evaluations of constants.
- */
+ */	/// [0, PAGE_SIZE), [PAGE_SIZE, 2 * PAGE_SIZE), [2 * PAGE_SIZE, 4 * PAGE_SIZE), ...
 #define get_order(n)						\
 (								\
 	__builtin_constant_p(n) ? (				\

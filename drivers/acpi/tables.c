@@ -485,11 +485,11 @@ void __init acpi_table_upgrade(void)
 		return;
 
 	for (no = 0; no < NR_ACPI_INITRD_TABLES; no++) {
-		file = find_cpio_data(cpio_path, data, size, &offset);
+		file = find_cpio_data(cpio_path, data, size, &offset);	/// Find the data according to cpio_path
 		if (!file.data)
 			break;
 
-		data += offset;
+		data += offset; /// Prepare for next iterator
 		size -= offset;
 
 		if (file.size < sizeof(struct acpi_table_header)) {
@@ -498,9 +498,9 @@ void __init acpi_table_upgrade(void)
 			continue;
 		}
 
-		table = file.data;
+		table = file.data;	/// The ACPI table header
 
-		for (sig = 0; table_sigs[sig]; sig++)
+		for (sig = 0; table_sigs[sig]; sig++)	/// Try to find table type
 			if (!memcmp(table->signature, table_sigs[sig], 4))
 				break;
 
