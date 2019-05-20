@@ -751,7 +751,7 @@ int __init acpi_table_init(void)
 {
 	acpi_status status;
 
-	if (acpi_verify_table_checksum) {
+	if (acpi_verify_table_checksum) {	/// It is a variable that can be changed by early param setting
 		pr_info("Early table checksum verification enabled\n");
 		acpi_gbl_enable_table_validation = TRUE;
 	} else {
