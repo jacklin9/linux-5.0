@@ -51,7 +51,7 @@ extern int smp_found_config;
 
 static inline void get_smp_config(void)
 {
-	x86_init.mpparse.get_smp_config(0);
+	x86_init.mpparse.get_smp_config(0);	/// Actually call default_get_smp_config
 }
 
 static inline void early_get_smp_config(void)

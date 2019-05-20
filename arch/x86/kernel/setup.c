@@ -1206,7 +1206,7 @@ void __init setup_arch(char **cmdline_p)
 	if (!early_xdbc_setup_hardware())
 		early_xdbc_register_console();
 
-	x86_init.paging.pagetable_init();
+	x86_init.paging.pagetable_init();	/// Actually native_pagetable_init
 
 	kasan_init();
 
@@ -1230,8 +1230,8 @@ void __init setup_arch(char **cmdline_p)
 	 * Read APIC and some other early information from ACPI tables.
 	 */
 	acpi_boot_init();
-	sfi_init();
-	x86_dtb_init();
+	sfi_init();	/// Simple Firmware Interface
+	x86_dtb_init();	/// Device Tree
 
 	/*
 	 * get boot-time SMP configuration:

@@ -215,7 +215,7 @@ void __init generic_apic_probe(void)
 	if (!cmdline_apic) {
 		struct apic **drv;
 
-		for (drv = __apicdrivers; drv < __apicdrivers_end; drv++) {
+		for (drv = __apicdrivers; drv < __apicdrivers_end; drv++) {	/// Defined with macro apic_driver 
 			if ((*drv)->probe()) {
 				apic = *drv;
 				break;

@@ -162,4 +162,10 @@ Initialization Process Explained
 35. FS & MEM MANAGE: in setup_arch, call reserve_initrd to make sure mem used by initrd is mapped and set initrd_start and initrd_end 
 36. ACPI: in setup_arch, call acpi_table_upgrade to find all ACPI tables in initrd, store them in acpi_initrd_files, allocate mem for ACPI table in memblock and store addr in acpi_tables_addr, and copy ACPI tables to acpi_tables_addr
 37. SMP: in setup_arch, call vsmp_init to check if the box support ScaleMP vSMP (set is_vsmp), and if vSMP is supported, set x86_platform.apic_post_init to vsmp_apic_post_init, set setup_max_cpus(by calling vsmp_cap_cpus)
-38. ACPI & SMP & DMI: in setup_arch, call acpi_boot_table_init
+38. ACPI & SMP & DMI: in setup_arch, call acpi_boot_table_init to config DMI hardware according to acpi_dmi_table, init ACPI table array initial_tables and acpi_gbl_root_table_list(by calling acpi_initialize_tables, in which RSDP is first found, and then parse tables into acpi_gbl_root_table_list)
+39. MEM MANAGE: in setup_arch, call initmem_init to set the NUMA node id of each region in memblock.memory
+40. PAGING: in setup_arch, call sync_initial_page_table to copy pgd entries which map virtual addr [PAGE_OFFSET, 2^64) in swapper_pg_dir to initial_page_table
+41. SYSCALL: in setup_arch, call map_vsyscall to map __vsyscall_page page to fixmap slot VSYSCALL_PAGE and set it accessible from user mode
+42. IDT: in setup_arch, call generic_apic_probe to determin the APIC driver in a list which is defined by macro apic_driver and store the result to variable apic
+43. ACPI & IDT: in setup_arch, call acpi_boot_init to parse table ACPI_SIG_BOOT, ACPI_SIG_FADT, Multiple APIC Description Table,ACPI_SIG_HPET 
+44. SMP: in setup_arch, call get_smp_config to 
