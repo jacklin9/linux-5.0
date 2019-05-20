@@ -137,7 +137,7 @@ static inline bool acpi_has_cpu_in_madt(void)
 #define ACPI_HAVE_ARCH_GET_ROOT_POINTER
 static inline u64 acpi_arch_get_root_pointer(void)
 {
-	return x86_init.acpi.get_root_pointer();
+	return x86_init.acpi.get_root_pointer();	/// Actually call x86_default_get_root_pointer
 }
 
 void acpi_generic_reduced_hw_init(void);
