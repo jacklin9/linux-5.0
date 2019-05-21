@@ -6063,7 +6063,7 @@ void __init sparse_memory_present_with_active_regions(int nid)
 	unsigned long start_pfn, end_pfn;
 	int i, this_nid;
 
-	for_each_mem_pfn_range(i, nid, &start_pfn, &end_pfn, &this_nid)
+	for_each_mem_pfn_range(i, nid, &start_pfn, &end_pfn, &this_nid)	/// For each mem region whose node id is nid in memblock.memory
 		memory_present(this_nid, start_pfn, end_pfn);
 }
 

@@ -212,10 +212,10 @@ void __init default_setup_apic_routing(void)
 
 void __init generic_apic_probe(void)
 {
-	if (!cmdline_apic) {
+	if (!cmdline_apic) {	/// Set by parse_apic which is called when parsing early param apic
 		struct apic **drv;
 
-		for (drv = __apicdrivers; drv < __apicdrivers_end; drv++) {	/// Defined with macro apic_driver 
+		for (drv = __apicdrivers; drv < __apicdrivers_end; drv++) {	/// Defined with macro apic_driver. An example is apic_default
 			if ((*drv)->probe()) {
 				apic = *drv;
 				break;

@@ -445,7 +445,7 @@ int __init acpi_numa_init(void)
 	 */
 
 	/* SRAT: System Resource Affinity Table */
-	if (!acpi_table_parse(ACPI_SIG_SRAT, acpi_parse_srat)) {
+	if (!acpi_table_parse(ACPI_SIG_SRAT, acpi_parse_srat)) {	/// Parse SRAT: System Resource Affinity Table. Real work is done below
 		struct acpi_subtable_proc srat_proc[3];
 
 		memset(srat_proc, 0, sizeof(srat_proc));
@@ -458,7 +458,7 @@ int __init acpi_numa_init(void)
 
 		acpi_table_parse_entries_array(ACPI_SIG_SRAT,
 					sizeof(struct acpi_table_srat),
-					srat_proc, ARRAY_SIZE(srat_proc), 0);
+					srat_proc, ARRAY_SIZE(srat_proc), 0);	/// Do the real parse here
 
 		cnt = acpi_table_parse_srat(ACPI_SRAT_TYPE_MEMORY_AFFINITY,
 					    acpi_parse_memory_affinity, 0);

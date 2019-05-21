@@ -1620,7 +1620,7 @@ int __init acpi_boot_init(void)
 	if (acpi_disabled)
 		return 1;
 
-	acpi_table_parse(ACPI_SIG_BOOT, acpi_parse_sbf);
+	acpi_table_parse(ACPI_SIG_BOOT, acpi_parse_sbf);	/// Second arg is function to call on the found table
 
 	/*
 	 * set sci_int and PM timer address

@@ -18,8 +18,8 @@
 
 #include "numa_internal.h"
 
-int numa_off;
-nodemask_t numa_nodes_parsed __initdata;
+int numa_off;	/// Set by numa_setup which is called early_param config "numa"
+nodemask_t numa_nodes_parsed __initdata;	/// Bit array
 
 struct pglist_data *node_data[MAX_NUMNODES] __read_mostly;
 EXPORT_SYMBOL(node_data);
@@ -625,21 +625,21 @@ static int __init numa_init(int (*init_func)(void))
 	int ret;
 
 	for (i = 0; i < MAX_LOCAL_APIC; i++)
-		set_apicid_to_node(i, NUMA_NO_NODE);
+		set_apicid_to_node(i, NUMA_NO_NODE);	/// Init array __apicid_to_node
 
-	nodes_clear(numa_nodes_parsed);
-	nodes_clear(node_possible_map);
-	nodes_clear(node_online_map);
-	memset(&numa_meminfo, 0, sizeof(numa_meminfo));
+	nodes_clear(numa_nodes_parsed);	/// Clear parsed NUMA node bit array
+	nodes_clear(node_possible_map);	/// Clear possible NUMA node bit array
+	nodes_clear(node_online_map);	/// Clear online NUMA node bit array
+	memset(&numa_meminfo, 0, sizeof(numa_meminfo));	/// numa_meminfo is an array of numa_memblk(start, end, node id)
 	WARN_ON(memblock_set_node(0, ULLONG_MAX, &memblock.memory,
-				  MAX_NUMNODES));
+				  MAX_NUMNODES));	/// base, size, mem type, node id
 	WARN_ON(memblock_set_node(0, ULLONG_MAX, &memblock.reserved,
-				  MAX_NUMNODES));
+				  MAX_NUMNODES));	/// 64
 	/* In case that parsing SRAT failed. */
 	WARN_ON(memblock_clear_hotplug(0, ULLONG_MAX));
 	numa_reset_distance();
 
-	ret = init_func();
+	ret = init_func();	/// Call x86_acpi_numa_init or amd_numa_init or dummy_numa_init
 	if (ret < 0)
 		return ret;
 

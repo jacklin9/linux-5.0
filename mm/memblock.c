@@ -1204,7 +1204,7 @@ void __init_memblock __next_mem_pfn_range(int *idx, int nid,
 	struct memblock_region *r;
 
 	while (++*idx < type->cnt) {
-		r = &type->regions[*idx];
+		r = &type->regions[*idx];	/// Get the region
 
 		if (PFN_UP(r->base) >= PFN_DOWN(r->base + r->size))
 			continue;

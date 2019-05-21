@@ -165,8 +165,9 @@ Initialization Process Explained
 38. ACPI & SMP & DMI: in setup_arch, call acpi_boot_table_init to config DMI hardware according to acpi_dmi_table, init acpi_gbl_root_table_list.tables, acpi_gbl_root_table_list.max_table_count, acpi_gbl_root_table_list.flags, get addr of RSDP, parse it and get addr of RSDT(for ACPI version 1) or XSDT(for ACPI version > 1), and finally get tables in the RSDT/XSDT and store it to acpi_gbl_root_table_list.tables. If table is FADT, store the index of the table entry in acpi_gbl_root_table_list.tables to acpi_gbl_fadt_index 
 39. ACPI & IDT: in setup_arch, call early_acpi_boot_init to parse MADT(Multiple APIC Description Table, by calling early_acpi_process_madt) and store local APIC addr to acpi_lapic_addr 
 40. MEM MANAGE: in setup_arch, call initmem_init to set the NUMA node id of each region in memblock.memory
-41. PAGING: in setup_arch, call sync_initial_page_table to copy pgd entries which map virtual addr [PAGE_OFFSET, 2^64) in swapper_pg_dir to initial_page_table
-42. SYSCALL: in setup_arch, call map_vsyscall to map __vsyscall_page page to fixmap slot VSYSCALL_PAGE and set it accessible from user mode
-43. IDT: in setup_arch, call generic_apic_probe to determin the APIC driver in a list which is defined by macro apic_driver and store the result to variable apic
-44. ACPI & IDT: in setup_arch, call acpi_boot_init to parse table ACPI_SIG_BOOT, ACPI_SIG_FADT, Multiple APIC Description Table,ACPI_SIG_HPET 
+41. SYSCALL: in setup_arch, call map_vsyscall to map __vsyscall_page page to fixmap slot VSYSCALL_PAGE and set it accessible from user mode
+42. IDT: in setup_arch, call generic_apic_probe to determin the APIC driver in a list which is defined by macro apic_driver and store the result to variable apic
+43. ACPI & IDT: in setup_arch, call acpi_boot_init to parse table ACPI_SIG_BOOT(save CMOS port to sbf_port), ACPI_SIG_FADT(store timer port to pmtmr_ioport), Multiple APIC Description Table(MADT, store lapic addr to acpi_lapic_addr),ACPI_SIG_HPET(store HPET base addr to hpet_address and blockid to hpet_blockid)  
+=================================================================================
+44. ACPI: in setup_arch, call sfi_init
 45. SMP: in setup_arch, call get_smp_config to 
