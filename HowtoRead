@@ -169,5 +169,5 @@ Initialization Process Explained
 42. IDT: in setup_arch, call generic_apic_probe to determin the APIC driver in a list which is defined by macro apic_driver and store the result to variable apic
 43. ACPI & IDT: in setup_arch, call acpi_boot_init to parse table ACPI_SIG_BOOT(save CMOS port to sbf_port), ACPI_SIG_FADT(store timer port to pmtmr_ioport), Multiple APIC Description Table(MADT, store lapic addr to acpi_lapic_addr),ACPI_SIG_HPET(store HPET base addr to hpet_address and blockid to hpet_blockid)  
 =================================================================================
-44. ACPI: in setup_arch, call sfi_init
+44. ACPI: in setup_arch, call sfi_init to disable SFI(by setting sfi_disabled) if ACPI is enabled. If SFI is enabled, search SFI table and assign the phy addr to syst_pa, parse the table
 45. SMP: in setup_arch, call get_smp_config to 

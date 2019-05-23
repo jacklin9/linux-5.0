@@ -319,7 +319,7 @@ static int __init sfi_parse_syst(void)
 	if (!syst_va)
 		return -ENOMEM;
 
-	tbl_cnt = SFI_GET_NUM_ENTRIES(syst_va, u64);
+	tbl_cnt = SFI_GET_NUM_ENTRIES(syst_va, u64);	/// Number of entry is (total len - header size) / entry size
 	for (i = 0; i < tbl_cnt; i++) {
 		ret = sfi_check_table(syst_va->pentry[i], &key);
 		if (IS_ERR(ret))
@@ -344,7 +344,7 @@ static __init int sfi_find_syst(void)
 	void *start;
 
 	len = SFI_SYST_SEARCH_END - SFI_SYST_SEARCH_BEGIN;
-	start = sfi_map_memory(SFI_SYST_SEARCH_BEGIN, len);
+	start = sfi_map_memory(SFI_SYST_SEARCH_BEGIN, len);	/// Map search range [0x000E0000, 0x000FFFFF) and search for SFI table
 	if (!start)
 		return -1;
 
@@ -353,16 +353,16 @@ static __init int sfi_find_syst(void)
 
 		syst_hdr = start + offset;
 		if (strncmp(syst_hdr->sig, SFI_SIG_SYST,
-				SFI_SIGNATURE_SIZE))
+				SFI_SIGNATURE_SIZE))	/// If signature doesn't match, skip
 			continue;
 
-		if (syst_hdr->len > PAGE_SIZE)
+		if (syst_hdr->len > PAGE_SIZE)	/// If size is incorrect, skip
 			continue;
 
 		sfi_print_table_header(SFI_SYST_SEARCH_BEGIN + offset,
 					syst_hdr);
 
-		if (sfi_verify_table(syst_hdr))
+		if (sfi_verify_table(syst_hdr))	/// Check checksum
 			continue;
 
 		/*
@@ -484,7 +484,7 @@ static int __init sfi_sysfs_init(void)
 
 void __init sfi_init(void)
 {
-	if (!acpi_disabled)
+	if (!acpi_disabled)	/// May set by prase_acpi in early param parse of acpi. If ACPI is enabled, no need to enable sfi
 		disable_sfi();
 
 	if (sfi_disabled)
