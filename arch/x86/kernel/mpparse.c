@@ -504,7 +504,7 @@ void __init default_get_smp_config(unsigned int early)
 {
 	struct mpf_intel *mpf;
 
-	if (!smp_found_config)
+	if (!smp_found_config)	/// If SMP config is not found, skip
 		return;
 
 	if (!mpf_found)

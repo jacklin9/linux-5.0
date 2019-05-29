@@ -546,10 +546,10 @@ static struct clock_event_device lapic_clockevent = {
 static DEFINE_PER_CPU(struct clock_event_device, lapic_events);
 
 #define DEADLINE_MODEL_MATCH_FUNC(model, func)	\
-	{ X86_VENDOR_INTEL, 6, model, X86_FEATURE_ANY, (unsigned long)&func }
+	{ X86_VENDOR_INTEL, 6, model, X86_FEATURE_ANY, (unsigned long)&func }	/// Generate struct x86_cpu_id 
 
 #define DEADLINE_MODEL_MATCH_REV(model, rev)	\
-	{ X86_VENDOR_INTEL, 6, model, X86_FEATURE_ANY, (unsigned long)rev }
+	{ X86_VENDOR_INTEL, 6, model, X86_FEATURE_ANY, (unsigned long)rev }	/// Generate struct x86_cpu_id 
 
 static u32 hsx_deadline_rev(void)
 {

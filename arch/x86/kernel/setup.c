@@ -1069,7 +1069,7 @@ void __init setup_arch(char **cmdline_p)
 	/* max_low_pfn get updated here */
 	find_low_pfn_range();
 #else
-	check_x2apic();
+	check_x2apic();	/// New version of APIC
 
 	/* How many end-of-memory variables you have, grandma! */
 	/* need this before calling reserve_initrd */

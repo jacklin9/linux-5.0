@@ -101,7 +101,7 @@ static void __iomem * __ref sfi_map_memory(u64 phys, u32 size)
 	if (!phys || !size)
 		return NULL;
 
-	if (sfi_use_memremap)
+	if (sfi_use_memremap)	/// Before calling sfi_init_late (which is done at the end of start_kernel), the flag is false
 		return memremap(phys, size, MEMREMAP_WB);
 	else
 		return early_memremap(phys, size);
@@ -167,8 +167,8 @@ static struct sfi_table_header *sfi_map_table(u64 pa)
 	struct sfi_table_header *th;
 	u32 length;
 
-	if (!TABLE_ON_PAGE(syst_pa, pa, sizeof(struct sfi_table_header)))
-		th = sfi_map_memory(pa, sizeof(struct sfi_table_header));
+	if (!TABLE_ON_PAGE(syst_pa, pa, sizeof(struct sfi_table_header)))	/// If the phy addr pa is not same as syst_pa, remap is
+		th = sfi_map_memory(pa, sizeof(struct sfi_table_header));		/// needed, otherwise page has been remapped
 	else
 		th = (void *)syst_va + (pa - syst_pa);
 
@@ -484,7 +484,7 @@ static int __init sfi_sysfs_init(void)
 
 void __init sfi_init(void)
 {
-	if (!acpi_disabled)	/// May set by prase_acpi in early param parse of acpi. If ACPI is enabled, no need to enable sfi
+	if (!acpi_disabled)	/// May set by parse_acpi in early param parse of acpi. If ACPI is enabled, no need to enable sfi
 		disable_sfi();
 
 	if (sfi_disabled)

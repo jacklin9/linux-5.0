@@ -105,10 +105,10 @@ int __init sfi_platform_init(void)
 {
 #ifdef CONFIG_X86_LOCAL_APIC
 	register_lapic_address(sfi_lapic_addr);
-	sfi_table_parse(SFI_SIG_CPUS, NULL, NULL, sfi_parse_cpus);
+	sfi_table_parse(SFI_SIG_CPUS, NULL, NULL, sfi_parse_cpus);	/// For SFI_SIG_CPUS SFI table, run sfi_parse_cpus
 #endif
 #ifdef CONFIG_X86_IO_APIC
-	sfi_table_parse(SFI_SIG_APIC, NULL, NULL, sfi_parse_ioapic);
+	sfi_table_parse(SFI_SIG_APIC, NULL, NULL, sfi_parse_ioapic);	/// For SFI_SIG_APIC SFI table, run sfi_parse_ioapic
 #endif
 	return 0;
 }

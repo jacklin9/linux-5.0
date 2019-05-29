@@ -389,7 +389,7 @@ extern int lapic_can_unplug_cpu(void);
 
 static inline u32 apic_read(u32 reg)
 {
-	return apic->read(reg);
+	return apic->read(reg);	/// apic is initialized by APIC setup routine
 }
 
 static inline void apic_write(u32 reg, u32 val)
