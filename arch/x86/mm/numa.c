@@ -54,13 +54,13 @@ early_param("numa", numa_setup);
 /*
  * apicid, cpu, node mappings
  */
-s16 __apicid_to_node[MAX_LOCAL_APIC] = {
+s16 __apicid_to_node[MAX_LOCAL_APIC] = {	/// Initialized in set_apicid_to_node
 	[0 ... MAX_LOCAL_APIC-1] = NUMA_NO_NODE
 };
 
 int numa_cpu_node(int cpu)
 {
-	int apicid = early_per_cpu(x86_cpu_to_apicid, cpu);
+	int apicid = early_per_cpu(x86_cpu_to_apicid, cpu);	/// Get the CPU's ID 
 
 	if (apicid != BAD_APICID)
 		return __apicid_to_node[apicid];
@@ -753,7 +753,7 @@ static void __init init_memory_less_node(int nid)
 void __init init_cpu_to_node(void)
 {
 	int cpu;
-	u16 *cpu_to_apicid = early_per_cpu_ptr(x86_cpu_to_apicid);
+	u16 *cpu_to_apicid = early_per_cpu_ptr(x86_cpu_to_apicid);	/// x86_cpu_to_apicid is a per-cpu var
 
 	BUG_ON(cpu_to_apicid == NULL);
 
@@ -766,7 +766,7 @@ void __init init_cpu_to_node(void)
 		if (!node_online(node))
 			init_memory_less_node(node);
 
-		numa_set_node(cpu, node);
+		numa_set_node(cpu, node);	/// Set x86_cpu_to_node_map
 	}
 }
 

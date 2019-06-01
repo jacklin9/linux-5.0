@@ -170,5 +170,9 @@ Initialization Process Explained
 43. ACPI & IDT: in setup_arch, call acpi_boot_init to parse table ACPI_SIG_BOOT(save CMOS port to sbf_port), ACPI_SIG_FADT(store timer port to pmtmr_ioport), Multiple APIC Description Table(MADT, store lapic addr to acpi_lapic_addr),ACPI_SIG_HPET(store HPET base addr to hpet_address and blockid to hpet_blockid)  
 44. ACPI & SMP: in setup_arch, call sfi_init to disable SFI(by setting sfi_disabled) if ACPI is enabled. If SFI is enabled, search SFI table and assign the phy addr to syst_pa, parse the table, and init LAPIC by setting mp_lapic_addr, parse CPU tables(by setting cpu_num and lapic ids) & IOAPIC tables
 45. SMP: in setup_arch, call get_smp_config to parse SMP config table stored in mpf_base and set mp_lapic_addr 
+46. NUMA & SMP: in setup_arch, call init_cpu_to_node to set each CPU's node and the result is stored in x86_cpu_to_node_map
+47. ACPI & RESOURCE: in setup_arch, call io_apic_init_mappings to allocate resource array ioapic_res for IOAPIC's, map the IOAPIC's base addr to fix map slots, and store phy addrs to resource array ioapic_res
+48. MEM MANAGE & RESOURCE: in setup_arch, call e820__reserve_resources to allocate mem of resource struct array for entries in e820_table, store the result to e820_res, init each resource entry in the array according to the start and end value of each entry in e820_table
+49. MEM MANAGE: in setup_arch, call e820__register_nosave_regions to generat a region struct for each gap between e820_table entries and non usual mem, and put the region to list nosave_regions. These no save regions will not be saved during hibernation
+50. RESOURCE: in setup_arch, call x86_init.resources.reserve_resources to request resources listed in standard_io_resources from ioport_resource 
 =================================================================================
-46. NUMA & SMP: in setup_arch, call init_cpu_to_node
