@@ -100,12 +100,12 @@ int register_refined_jiffies(long cycles_per_second)
 
 	refined_jiffies = clocksource_jiffies;
 	refined_jiffies.name = "refined-jiffies";
-	refined_jiffies.rating++;
+	refined_jiffies.rating++;	/// Usability rating
 
 	/* Calc cycles per tick */
-	cycles_per_tick = (cycles_per_second + HZ/2)/HZ;
+	cycles_per_tick = (cycles_per_second + HZ/2)/HZ;	/// HZ ticks per second
 	/* shift_hz stores hz<<8 for extra accuracy */
-	shift_hz = (u64)cycles_per_second << 8;
+	shift_hz = (u64)cycles_per_second << 8;	/// cycles_per_second * 256
 	shift_hz += cycles_per_tick/2;
 	do_div(shift_hz, cycles_per_tick);
 	/* Calculate nsec_per_tick using shift_hz */

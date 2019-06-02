@@ -175,4 +175,8 @@ Initialization Process Explained
 48. MEM MANAGE & RESOURCE: in setup_arch, call e820__reserve_resources to allocate mem of resource struct array for entries in e820_table, store the result to e820_res, init each resource entry in the array according to the start and end value of each entry in e820_table
 49. MEM MANAGE: in setup_arch, call e820__register_nosave_regions to generat a region struct for each gap between e820_table entries and non usual mem, and put the region to list nosave_regions. These no save regions will not be saved during hibernation
 50. RESOURCE: in setup_arch, call x86_init.resources.reserve_resources to request resources listed in standard_io_resources from ioport_resource 
+51. PCI: in setup_arch, call e820__setup_pci_gap to find a gap of size 4M below 4G range in e820_table. If not found, take the addr of 1M beyond last phy mem as the gap start point in 64 bit mode, and take addr 256M as the gap start point in 32 bit mode. Then assign the addr to pci_mem_start 
+52. APIC: in setup_arch, call mcheck_init to init machine check. In detail, store thermal LVT to lvtthmr_init, add notifier block first_nb, mce_srao_nb, and mce_default_nb to x86_mce_decoder_chain, add mce_gen_pool_process to work queue mce_work, add mce_irq_work_cb to irq work mce_irq_work
+53. TIME: in setup_arch, call register_refined_jiffies to init clock source refined_jiffies based on clocksource_jiffies and register the clock source
+54. RANDOM: in start_kernel, call add_latent_entropy
 =================================================================================

@@ -421,7 +421,7 @@ void __init mcheck_intel_therm_init(void)
 	 * entry BIOS programmed later
 	 */
 	if (intel_thermal_supported(&boot_cpu_data))
-		lvtthmr_init = apic_read(APIC_LVTTHMR);
+		lvtthmr_init = apic_read(APIC_LVTTHMR);	/// LVT: local vector table
 }
 
 void intel_init_thermal(struct cpuinfo_x86 *c)
