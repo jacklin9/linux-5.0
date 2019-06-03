@@ -179,5 +179,7 @@ Initialization Process Explained
 52. APIC: in setup_arch, call mcheck_init to init machine check. In detail, store thermal LVT to lvtthmr_init, add notifier block first_nb, mce_srao_nb, and mce_default_nb to x86_mce_decoder_chain, add mce_gen_pool_process to work queue mce_work, add mce_irq_work_cb to irq work mce_irq_work
 53. TIME: in setup_arch, call register_refined_jiffies to init clock source refined_jiffies based on clocksource_jiffies and register the clock source
 54. RANDOM: in start_kernel, call add_latent_entropy to add latent_entropy to entropy pool, then call add_device_randomness to add command_line to entropy pool
-=================================================================================
 55. KERNEL STACK: in start_kernel, call boot_init_stack_canary to calulate stack canary by mixing the random value from entropy pool and tsc value (in-cpu timestamp counter), and assign this value to init_task.stack_canary and irq_stack_union.stack_canary 
+56. SMP & MEM MANAGE: in start_kernel, call mm_init_cpumask to clear cpu_bitmap of mm_struct init_mm
+=================================================================================
+57. CONFIG & COMMAND LINE: in start_kernel, call setup_command_line

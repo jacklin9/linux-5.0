@@ -512,7 +512,7 @@ static inline void mm_init_cpumask(struct mm_struct *mm)
 {
 	unsigned long cpu_bitmap = (unsigned long)mm;
 
-	cpu_bitmap += offsetof(struct mm_struct, cpu_bitmap);
+	cpu_bitmap += offsetof(struct mm_struct, cpu_bitmap);	/// Addr of the cpu_bitmap
 	cpumask_clear((struct cpumask *)cpu_bitmap);
 }
 
