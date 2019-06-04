@@ -126,10 +126,10 @@ Initialization Process Explained
 2. PAGE MAPPING: in function __startup_64, use early_top_pgt to set up kernel virtual addr space mapping and identical mapping of physical mem used by kernel. In kernel virtual addr mapping, pages used by all other levels are statically allocated; in identical mapping, allocate pages in early_dynamic_pgts pool which is in section .init.data
 3. KERNEL STACK: at arch/x86/kernel/head_64.S:171, set stack to be the end of init task kernel stack again
 4. PAGE MAPPING: set gdt by using early_gdt_descr which points to per-cpu gdt
-5. PAGE MAPPING: in function __x86_64_start_kernel, call reset_early_page_tables to clear the identical mapping and reset early_dynamic_pgts pool
-6. PAGE MAPPING: in function __x86_64_start_kernel, call clear_page to clear init_top_pgt
-7. KASAN & PAGE MAPPING: in function __x86_64_start_kernel, call kasan_early_init to add statically allocated page kasan_early_shadow_page to both early_top_pgt and init_top_gdt
-8. IDT: in function __x86_64_start_kernel, call idt_setup_early_handler to fill idt_table with early_idt_handler_array which processes page fault exception seariously and ignores other exceptions (calls early_fixup_exception)
+5. PAGE MAPPING: in function x86_64_start_kernel, call reset_early_page_tables to clear the identical mapping and reset early_dynamic_pgts pool
+6. PAGE MAPPING: in function x86_64_start_kernel, call clear_page to clear init_top_pgt
+7. KASAN & PAGE MAPPING: in function x86_64_start_kernel, call kasan_early_init to add statically allocated page kasan_early_shadow_page to both early_top_pgt and init_top_gdt
+8. IDT: in function x86_64_start_kernel, call idt_setup_early_handler to fill idt_table with early_idt_handler_array which processes page fault exception seariously and ignores other exceptions (calls early_fixup_exception)
 9. PAGE MAPPING: at x86_64_start_kernel:465, fill init_top_gdt with kernel virtual addr mapping
 10. KERNEL STACK: in start_kernel, call set_task_stack_end_magic to fill the end of init task kernel stack with stack protector value 
 11. DEBUG: in start_kernel, call debug_objects_early_init to init obj_hash which is a hashlist of debug_obj, and init linked list obj_pool by adding debug_obj in obj_static_pool
@@ -181,5 +181,6 @@ Initialization Process Explained
 54. RANDOM: in start_kernel, call add_latent_entropy to add latent_entropy to entropy pool, then call add_device_randomness to add command_line to entropy pool
 55. KERNEL STACK: in start_kernel, call boot_init_stack_canary to calulate stack canary by mixing the random value from entropy pool and tsc value (in-cpu timestamp counter), and assign this value to init_task.stack_canary and irq_stack_union.stack_canary 
 56. SMP & MEM MANAGE: in start_kernel, call mm_init_cpumask to clear cpu_bitmap of mm_struct init_mm
+57. CONFIG & COMMAND LINE: in start_kernel, call setup_command_line to alloc mem from memblock for saved_command_line and static_command_line, copy boot_command_line(initialized in copy_bootdata called by x86_64_start_kernel) to saved_command_line, and copy command_line to static_command_line
 =================================================================================
-57. CONFIG & COMMAND LINE: in start_kernel, call setup_command_line
+58. PER CPU: in start_kernel, call setup_per_cpu_areas

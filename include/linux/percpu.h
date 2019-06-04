@@ -91,7 +91,7 @@ struct pcpu_alloc_info {
 };
 
 enum pcpu_fc {
-	PCPU_FC_AUTO,
+	PCPU_FC_AUTO,	/// AUTO is embed, the other is page
 	PCPU_FC_EMBED,
 	PCPU_FC_PAGE,
 

@@ -2208,7 +2208,7 @@ const char * const pcpu_fc_names[PCPU_FC_NR] __initconst = {
 	[PCPU_FC_PAGE]	= "page",
 };
 
-enum pcpu_fc pcpu_chosen_fc __initdata = PCPU_FC_AUTO;
+enum pcpu_fc pcpu_chosen_fc __initdata = PCPU_FC_AUTO;	/// Default is auto/embed. Can be set by percpu_alloc_setup in early param percpu_alloc
 
 static int __init percpu_alloc_setup(char *str)
 {

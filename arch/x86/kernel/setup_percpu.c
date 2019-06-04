@@ -198,7 +198,7 @@ void __init setup_per_cpu_areas(void)
 		 * and large vmalloc area allocs can easily fail.
 		 */
 #ifdef CONFIG_X86_64
-		atom_size = PMD_SIZE;
+		atom_size = PMD_SIZE;	/// PGD, P4D, PUD, PMD, PTE, PAGE. 2MB
 #else
 		atom_size = PAGE_SIZE;
 #endif
