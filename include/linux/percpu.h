@@ -20,7 +20,7 @@
 #endif
 
 /* minimum unit size, also is the maximum supported allocation size */
-#define PCPU_MIN_UNIT_SIZE		PFN_ALIGN(32 << 10)
+#define PCPU_MIN_UNIT_SIZE		PFN_ALIGN(32 << 10)	/// 32K
 
 /* minimum allocation size and shift in bytes */
 #define PCPU_MIN_ALLOC_SHIFT		2
