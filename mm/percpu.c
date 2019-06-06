@@ -2292,7 +2292,7 @@ static struct pcpu_alloc_info * __init pcpu_build_alloc_info(
 
 	/* calculate size_sum and ensure dyn_size is enough for early alloc */
 	size_sum = PFN_ALIGN(static_size + reserved_size +
-			    max_t(size_t, dyn_size, PERCPU_DYNAMIC_EARLY_SIZE));
+			    max_t(size_t, dyn_size, PERCPU_DYNAMIC_EARLY_SIZE));	/// Possible unit size
 	dyn_size = size_sum - static_size - reserved_size;	/// Composed of static size, reserved size, and dyn_size
 
 	/*
@@ -2301,12 +2301,12 @@ static struct pcpu_alloc_info * __init pcpu_build_alloc_info(
 	 * which can accommodate 4k aligned segments which are equal to
 	 * or larger than min_unit_size.
 	 */
-	min_unit_size = max_t(size_t, size_sum, PCPU_MIN_UNIT_SIZE);
+	min_unit_size = max_t(size_t, size_sum, PCPU_MIN_UNIT_SIZE);	/// Each CPU needs a unit
 
 	/* determine the maximum # of units that can fit in an allocation */
 	alloc_size = roundup(min_unit_size, atom_size);
 	upa = alloc_size / min_unit_size;	/// unit number
-	while (alloc_size % upa || (offset_in_page(alloc_size / upa)))
+	while (alloc_size % upa || (offset_in_page(alloc_size / upa)))	/// Unit size must be times of page size
 		upa--;
 	max_upa = upa;
 
@@ -2341,9 +2341,9 @@ static struct pcpu_alloc_info * __init pcpu_build_alloc_info(
 		if (alloc_size % upa || (offset_in_page(alloc_size / upa)))
 			continue;
 
-		for (group = 0; group < nr_groups; group++) {
-			int this_allocs = DIV_ROUND_UP(group_cnt[group], upa);
-			allocs += this_allocs;
+		for (group = 0; group < nr_groups; group++) {	/// CPU group number
+			int this_allocs = DIV_ROUND_UP(group_cnt[group], upa);	/// RoundUp(cpu_number/upa)
+			allocs += this_allocs;	/// Each cpu needs one unit; units for one group should be allocated together. allocs is the alloc number
 			wasted += this_allocs * upa - group_cnt[group];
 		}
 
