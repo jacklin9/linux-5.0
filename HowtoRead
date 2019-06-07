@@ -182,5 +182,14 @@ Initialization Process Explained
 55. KERNEL STACK: in start_kernel, call boot_init_stack_canary to calulate stack canary by mixing the random value from entropy pool and tsc value (in-cpu timestamp counter), and assign this value to init_task.stack_canary and irq_stack_union.stack_canary 
 56. SMP & MEM MANAGE: in start_kernel, call mm_init_cpumask to clear cpu_bitmap of mm_struct init_mm
 57. CONFIG & COMMAND LINE: in start_kernel, call setup_command_line to alloc mem from memblock for saved_command_line and static_command_line, copy boot_command_line(initialized in copy_bootdata called by x86_64_start_kernel) to saved_command_line, and copy command_line to static_command_line
+58. PER CPU: in start_kernel, call setup_per_cpu_areas to do the following:
+	1. Calculate the allocation info of per cpu mem (cpu group, allocation size, unit size-mem needed by one cpu)
+	2. Allocate mem for each cpu group and copy static per cpu data to each cpu's unit
+	3. Store group number to pcpu_nr_groups, store each group's offset to map pcpu_group_offsets, store each group's mem size to pcpu_group_sizes, store each cpu's unit id to map pcpu_unit_map, store each cpu's mem offset to map pcpu_unit_offsets, store each unit's size in page to pcpu_unit_pages, store each unit's size in byte to pcpu_unit_size, allocate the first chunk for dynamic per-cpu and store the addr to pcpu_first_chunk, and store the base addr of mem to pcpu_base_addr   
+	4. For each cpu, set per_cpu_offset to be the sum of offset between the cpu's unit and the base addr of allocated mem, and the delta between base addr of allocated mem and start virtual addr of per-cpu area
+59. SMP: in start_kernel, call smp_prepare_boot_cpu to get the current cpu id, load GDT of the current CPU, set gs base to the kernel irq stack, and set the current cpu online
+60. MEM MANAGE: in start_kernel, call build_all_zonelists to find each node's fallback nodes, add zone list of each fallback node to this node's fallback zone list, and add this node's zone list to this node's nofallback zone list
+61. TEST: in start_kernel, call setup_log_buf to update new_log_buf_len according to cpu num if necessary, allocate new log buf, and copy the content in old buf to the new one
+62. FS: in start_kernel, call vfs_caches_init_early to init hash table in_lookup_hashtable (an array of list) as empty, init dentry_hashtable(if not numa configured; otherwise, don't initialize the hashtable here because hashtable will distribute across nodes), and init inode_hashtable(if not numa configured; otherwise, don't initialize the hashtable here because hashtable will distribute across nodes)
 =================================================================================
-58. PER CPU: in start_kernel, call setup_per_cpu_areas
+63. IDT: in start_kernel, call trap_init

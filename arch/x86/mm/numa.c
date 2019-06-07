@@ -21,7 +21,7 @@
 int numa_off;	/// Set by numa_setup which is called early_param config "numa"
 nodemask_t numa_nodes_parsed __initdata;	/// Bit array
 
-struct pglist_data *node_data[MAX_NUMNODES] __read_mostly;
+struct pglist_data *node_data[MAX_NUMNODES] __read_mostly;	/// Mem node list
 EXPORT_SYMBOL(node_data);
 
 static struct numa_meminfo numa_meminfo

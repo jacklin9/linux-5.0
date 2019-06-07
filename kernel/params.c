@@ -179,7 +179,7 @@ char *parse_args(const char *doing,	/// = "early options"
 	if (*args)
 		pr_debug("doing %s, parsing ARGS: '%s'\n", doing, args);
 
-	while (*args) {
+	while (*args) {	/// For each param
 		int ret;
 		int irq_was_disabled;
 
@@ -189,7 +189,7 @@ char *parse_args(const char *doing,	/// = "early options"
 			return err ?: args;
 		irq_was_disabled = irqs_disabled();
 		ret = parse_one(param, val, doing, params, num,
-				min_level, max_level, arg, unknown);
+				min_level, max_level, arg, unknown);	/// Handle arg (param, val) by finding the param in param list params
 		if (irq_was_disabled && !irqs_disabled())
 			pr_warn("%s: option '%s' enabled irq's!\n",
 				doing, param);

@@ -84,7 +84,7 @@ struct pcpu_alloc_info {
 	size_t			dyn_size;
 	size_t			unit_size;
 	size_t			atom_size;
-	size_t			alloc_size;
+	size_t			alloc_size;	/// Size of one allocation
 	size_t			__ai_size;	/* internal, don't use */
 	int			nr_groups;	/* 0 if grouping unnecessary */
 	struct pcpu_group_info	groups[];

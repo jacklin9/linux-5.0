@@ -1047,7 +1047,7 @@ static unsigned long __initdata new_log_buf_len;
 /* we practice scaling the ring buffer by powers of 2 */
 static void __init log_buf_len_update(u64 size)
 {
-	if (size > (u64)LOG_BUF_LEN_MAX) {
+	if (size > (u64)LOG_BUF_LEN_MAX) {	/// Maximum log buf len
 		size = (u64)LOG_BUF_LEN_MAX;
 		pr_err("log_buf over 2G is not supported.\n");
 	}
@@ -1107,7 +1107,7 @@ static void __init log_buf_add_cpu(void)
 static inline void log_buf_add_cpu(void) {}
 #endif /* CONFIG_SMP */
 
-void __init setup_log_buf(int early)
+void __init setup_log_buf(int early)	/// When called in setup_arch, early = 1, when called in start_kernel, early = 0
 {
 	unsigned long flags;
 	char *new_log_buf;
@@ -1116,10 +1116,10 @@ void __init setup_log_buf(int early)
 	if (log_buf != __log_buf)	/// Initially log_buf == __log_buf. After the setup, the condition will not hold
 		return;
 
-	if (!early && !new_log_buf_len)
+	if (!early && !new_log_buf_len)	/// When called in start_kernel, condition here holds
 		log_buf_add_cpu();
 
-	if (!new_log_buf_len)
+	if (!new_log_buf_len)	/// new_log_buf_len is not 0 when new log buf needs be allocated
 		return;
 
 	if (early) {

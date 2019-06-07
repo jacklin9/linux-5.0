@@ -102,7 +102,7 @@ static inline struct hlist_bl_head *d_hash(unsigned int hash)
 }
 
 #define IN_LOOKUP_SHIFT 10
-static struct hlist_bl_head in_lookup_hashtable[1 << IN_LOOKUP_SHIFT];
+static struct hlist_bl_head in_lookup_hashtable[1 << IN_LOOKUP_SHIFT];	/// Array that has 1K elements
 
 static inline struct hlist_bl_head *in_lookup_hash(const struct dentry *parent,
 					unsigned int hash)

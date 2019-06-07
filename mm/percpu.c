@@ -2076,9 +2076,9 @@ int __init pcpu_setup_first_chunk(const struct pcpu_alloc_info *ai,
 
 	/* process group information and build config tables accordingly */
 	group_offsets = memblock_alloc(ai->nr_groups * sizeof(group_offsets[0]),
-				       SMP_CACHE_BYTES);
+				       SMP_CACHE_BYTES);	/// Record offset of each group
 	group_sizes = memblock_alloc(ai->nr_groups * sizeof(group_sizes[0]),
-				     SMP_CACHE_BYTES);
+				     SMP_CACHE_BYTES);	/// Record each group's mem size
 	unit_map = memblock_alloc(nr_cpu_ids * sizeof(unit_map[0]),
 				  SMP_CACHE_BYTES);
 	unit_off = memblock_alloc(nr_cpu_ids * sizeof(unit_off[0]),
@@ -2090,13 +2090,13 @@ int __init pcpu_setup_first_chunk(const struct pcpu_alloc_info *ai,
 	pcpu_low_unit_cpu = NR_CPUS;
 	pcpu_high_unit_cpu = NR_CPUS;
 
-	for (group = 0, unit = 0; group < ai->nr_groups; group++, unit += i) {
+	for (group = 0, unit = 0; group < ai->nr_groups; group++, unit += i) {	// For each group
 		const struct pcpu_group_info *gi = &ai->groups[group];
 
 		group_offsets[group] = gi->base_offset;
 		group_sizes[group] = gi->nr_units * ai->unit_size;
 
-		for (i = 0; i < gi->nr_units; i++) {
+		for (i = 0; i < gi->nr_units; i++) {	/// For each CPU in the group
 			cpu = gi->cpu_map[i];
 			if (cpu == NR_CPUS)
 				continue;
@@ -2105,19 +2105,19 @@ int __init pcpu_setup_first_chunk(const struct pcpu_alloc_info *ai,
 			PCPU_SETUP_BUG_ON(!cpu_possible(cpu));
 			PCPU_SETUP_BUG_ON(unit_map[cpu] != UINT_MAX);
 
-			unit_map[cpu] = unit + i;
-			unit_off[cpu] = gi->base_offset + i * ai->unit_size;
+			unit_map[cpu] = unit + i;	/// Map cpu id to unit id
+			unit_off[cpu] = gi->base_offset + i * ai->unit_size;	/// Map cpu id to unit offset
 
 			/* determine low/high unit_cpu */
 			if (pcpu_low_unit_cpu == NR_CPUS ||
 			    unit_off[cpu] < unit_off[pcpu_low_unit_cpu])
-				pcpu_low_unit_cpu = cpu;
+				pcpu_low_unit_cpu = cpu;	/// Record the cpu id with lowerest offset
 			if (pcpu_high_unit_cpu == NR_CPUS ||
 			    unit_off[cpu] > unit_off[pcpu_high_unit_cpu])
-				pcpu_high_unit_cpu = cpu;
+				pcpu_high_unit_cpu = cpu;	/// Record the cpu id with highest offset
 		}
 	}
-	pcpu_nr_units = unit;
+	pcpu_nr_units = unit;	/// Record the number of CPU, or equivalently unit number
 
 	for_each_possible_cpu(cpu)
 		PCPU_SETUP_BUG_ON(unit_map[cpu] == UINT_MAX);
@@ -2170,7 +2170,7 @@ int __init pcpu_setup_first_chunk(const struct pcpu_alloc_info *ai,
 	 * pcpu_first_chunk, will always point to the chunk that serves
 	 * the dynamic region.
 	 */
-	tmp_addr = (unsigned long)base_addr + static_size;
+	tmp_addr = (unsigned long)base_addr + static_size;	/// Start addr of reserved area
 	map_size = ai->reserved_size ?: dyn_size;
 	chunk = pcpu_alloc_first_chunk(tmp_addr, map_size);
 
@@ -2453,14 +2453,14 @@ int __init pcpu_embed_first_chunk(size_t reserved_size, size_t dyn_size,
 	int group, i, highest_group, rc;
 
 	ai = pcpu_build_alloc_info(reserved_size, dyn_size, atom_size,
-				   cpu_distance_fn);
+				   cpu_distance_fn);	/// Compute the allocation amount in alloc unit(mem needed by one CPU) and group info
 	if (IS_ERR(ai))
 		return PTR_ERR(ai);
 
 	size_sum = ai->static_size + ai->reserved_size + ai->dyn_size;
 	areas_size = PFN_ALIGN(ai->nr_groups * sizeof(void *));
 
-	areas = memblock_alloc_nopanic(areas_size, SMP_CACHE_BYTES);
+	areas = memblock_alloc_nopanic(areas_size, SMP_CACHE_BYTES);	/// areas is an array of pointers to mem allocated to groups
 	if (!areas) {
 		rc = -ENOMEM;
 		goto out_free;
@@ -2473,12 +2473,12 @@ int __init pcpu_embed_first_chunk(size_t reserved_size, size_t dyn_size,
 		unsigned int cpu = NR_CPUS;
 		void *ptr;
 
-		for (i = 0; i < gi->nr_units && cpu == NR_CPUS; i++)
+		for (i = 0; i < gi->nr_units && cpu == NR_CPUS; i++)	/// Find the first CPU in the group
 			cpu = gi->cpu_map[i];
 		BUG_ON(cpu == NR_CPUS);
 
 		/* allocate space for the whole group */
-		ptr = alloc_fn(cpu, gi->nr_units * ai->unit_size, atom_size);
+		ptr = alloc_fn(cpu, gi->nr_units * ai->unit_size, atom_size); /// pcpu_fc_alloc is acutally called. Allocate from memblock
 		if (!ptr) {
 			rc = -ENOMEM;
 			goto out_free_areas;
@@ -2487,12 +2487,12 @@ int __init pcpu_embed_first_chunk(size_t reserved_size, size_t dyn_size,
 		kmemleak_free(ptr);
 		areas[group] = ptr;
 
-		base = min(ptr, base);
+		base = min(ptr, base);	/// base record the lowest allocated mem
 		if (ptr > areas[highest_group])
-			highest_group = group;
+			highest_group = group;	/// highest_group record group who has the highest allocated mem
 	}
 	max_distance = areas[highest_group] - base;
-	max_distance += ai->unit_size * ai->groups[highest_group].nr_units;
+	max_distance += ai->unit_size * ai->groups[highest_group].nr_units;	/// max_distance is the start addr of lowerest mem and end addr of highest mem
 
 	/* warn if maximum distance is further than 75% of vmalloc space */
 	if (max_distance > VMALLOC_TOTAL * 3 / 4) {
@@ -2510,11 +2510,11 @@ int __init pcpu_embed_first_chunk(size_t reserved_size, size_t dyn_size,
 	 * allocations are complete; otherwise, we may end up with
 	 * overlapping groups.
 	 */
-	for (group = 0; group < ai->nr_groups; group++) {
+	for (group = 0; group < ai->nr_groups; group++) {	/// For each group
 		struct pcpu_group_info *gi = &ai->groups[group];
 		void *ptr = areas[group];
 
-		for (i = 0; i < gi->nr_units; i++, ptr += ai->unit_size) {
+		for (i = 0; i < gi->nr_units; i++, ptr += ai->unit_size) {	/// For each CPU in the group
 			if (gi->cpu_map[i] == NR_CPUS) {
 				/* unused unit, free whole */
 				free_fn(ptr, ai->unit_size);
@@ -2528,7 +2528,7 @@ int __init pcpu_embed_first_chunk(size_t reserved_size, size_t dyn_size,
 
 	/* base address is now known, determine group base offsets */
 	for (group = 0; group < ai->nr_groups; group++) {
-		ai->groups[group].base_offset = areas[group] - base;
+		ai->groups[group].base_offset = areas[group] - base;	/// group.base_offset records the offset of mem of the group to the lowerest group
 	}
 
 	pr_info("Embedded %zu pages/cpu @%p s%zu r%zu d%zu u%zu\n",

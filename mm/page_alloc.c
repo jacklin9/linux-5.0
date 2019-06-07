@@ -5220,7 +5220,7 @@ static void zoneref_set_zone(struct zone *zone, struct zoneref *zoneref)
  *
  * Add all populated zones of a node to the zonelist.
  */
-static int build_zonerefs_node(pg_data_t *pgdat, struct zoneref *zonerefs)
+static int build_zonerefs_node(pg_data_t *pgdat, struct zoneref *zonerefs)	/// Take node pgdat as fallback node and build zone list of it, store the result to zonerefs
 {
 	struct zone *zone;
 	enum zone_type zone_type = MAX_NR_ZONES;
@@ -5363,17 +5363,17 @@ static void build_zonelists_in_node_order(pg_data_t *pgdat, int *node_order,
 	struct zoneref *zonerefs;
 	int i;
 
-	zonerefs = pgdat->node_zonelists[ZONELIST_FALLBACK]._zonerefs;
+	zonerefs = pgdat->node_zonelists[ZONELIST_FALLBACK]._zonerefs;	/// Fallback zone list. _zonerefs is an array of zone pointers
 
-	for (i = 0; i < nr_nodes; i++) {
+	for (i = 0; i < nr_nodes; i++) {	/// For each fallback node
 		int nr_zones;
 
 		pg_data_t *node = NODE_DATA(node_order[i]);
 
-		nr_zones = build_zonerefs_node(node, zonerefs);
+		nr_zones = build_zonerefs_node(node, zonerefs);	/// Store zone pointers in the zone list of node to zonerefs
 		zonerefs += nr_zones;
 	}
-	zonerefs->zone = NULL;
+	zonerefs->zone = NULL;	/// Last zone
 	zonerefs->zone_idx = 0;
 }
 
@@ -5399,7 +5399,7 @@ static void build_thisnode_zonelists(pg_data_t *pgdat)
  * may still exist in local DMA zone.
  */
 
-static void build_zonelists(pg_data_t *pgdat)
+static void build_zonelists(pg_data_t *pgdat)	/// Build zone list for node pgdat
 {
 	static int node_order[MAX_NUMNODES];
 	int node, load, nr_nodes = 0;
@@ -5413,7 +5413,7 @@ static void build_zonelists(pg_data_t *pgdat)
 	nodes_clear(used_mask);
 
 	memset(node_order, 0, sizeof(node_order));
-	while ((node = find_next_best_node(local_node, &used_mask)) >= 0) {
+	while ((node = find_next_best_node(local_node, &used_mask)) >= 0) {	/// Calculate the fallback node list of this node
 		/*
 		 * We don't want to pressure a particular node.
 		 * So adding penalty to the first node in same
@@ -5421,15 +5421,15 @@ static void build_zonelists(pg_data_t *pgdat)
 		 */
 		if (node_distance(local_node, node) !=
 		    node_distance(local_node, prev_node))
-			node_load[node] = load;
+			node_load[node] = load; /// Set penalty
 
 		node_order[nr_nodes++] = node;
 		prev_node = node;
 		load--;
 	}
 
-	build_zonelists_in_node_order(pgdat, node_order, nr_nodes);
-	build_thisnode_zonelists(pgdat);
+	build_zonelists_in_node_order(pgdat, node_order, nr_nodes);	/// According to node order, add each fallback node's zone ref list to this node's fallback _zonerefs field
+	build_thisnode_zonelists(pgdat);	/// Add this node's zone list to the nofallback zonerefs
 }
 
 #ifdef CONFIG_HAVE_MEMORYLESS_NODES
@@ -5532,10 +5532,10 @@ static void __build_all_zonelists(void *data)
 	if (self && !node_online(self->node_id)) {
 		build_zonelists(self);
 	} else {
-		for_each_online_node(nid) {
-			pg_data_t *pgdat = NODE_DATA(nid);
+		for_each_online_node(nid) {	/// Build zone list for all nodes
+			pg_data_t *pgdat = NODE_DATA(nid);	/// node_data is initialized in numa_init called by setup_arch
 
-			build_zonelists(pgdat);
+			build_zonelists(pgdat);	/// Find fallback node order of this node, add zone list of each fallback node to this node's fallback zone list, and add this node's zone list to this node's nofallback zone list
 		}
 
 #ifdef CONFIG_HAVE_MEMORYLESS_NODES
@@ -5588,9 +5588,9 @@ build_all_zonelists_init(void)
  * __ref due to call of __init annotated helper build_all_zonelists_init
  * [protected by SYSTEM_BOOTING].
  */
-void __ref build_all_zonelists(pg_data_t *pgdat)
+void __ref build_all_zonelists(pg_data_t *pgdat)	/// pg_data_t represents a mem node. A node has zones. A zone a zone mem map which is a list of pages
 {
-	if (system_state == SYSTEM_BOOTING) {
+	if (system_state == SYSTEM_BOOTING) {	/// When it is first called, system_state is in SYSTEM_BOOTING
 		build_all_zonelists_init();
 	} else {
 		__build_all_zonelists(pgdat);

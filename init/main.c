@@ -574,7 +574,7 @@ asmlinkage __visible void __init start_kernel(void)	/// Still using early_top_pg
 	page_alloc_init();
 
 	pr_notice("Kernel command line: %s\n", boot_command_line);
-	parse_early_param();
+	parse_early_param();	/// This should have been called in setup_arch, so no effect here
 	after_dashes = parse_args("Booting kernel",
 				  static_command_line, __start___param,
 				  __stop___param - __start___param,
@@ -591,7 +591,7 @@ asmlinkage __visible void __init start_kernel(void)	/// Still using early_top_pg
 	 */
 	setup_log_buf(0);
 	vfs_caches_init_early();
-	sort_main_extable();
+	sort_main_extable();	/// Sort exception table
 	trap_init();
 	mm_init();
 
