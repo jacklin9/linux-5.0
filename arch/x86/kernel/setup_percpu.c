@@ -188,6 +188,7 @@ void __init setup_per_cpu_areas(void)
 	if (pcpu_chosen_fc != PCPU_FC_PAGE) {	/// Default is AUTO (EMBED), the other is PAGE
 		const size_t dyn_size = PERCPU_MODULE_RESERVE +	/// Used for static per-cpu vars in modules
 			PERCPU_DYNAMIC_RESERVE - PERCPU_FIRST_CHUNK_RESERVE;	/// First chunk used for static per-cpu vars
+			/// 8K + 28K - 8K
 		size_t atom_size;
 
 		/*
@@ -205,7 +206,7 @@ void __init setup_per_cpu_areas(void)
 		rc = pcpu_embed_first_chunk(PERCPU_FIRST_CHUNK_RESERVE,	/// Use embed allocator. pcpu_base_addr set here
 					    dyn_size, atom_size,
 					    pcpu_cpu_distance,
-					    pcpu_fc_alloc, pcpu_fc_free);
+					    pcpu_fc_alloc, pcpu_fc_free);	/// Alloc function, free function
 		if (rc < 0)
 			pr_warning("%s allocator failed (%d), falling back to page size\n",
 				   pcpu_fc_names[pcpu_chosen_fc], rc);

@@ -14,7 +14,7 @@
 
 /* enough to cover all DEFINE_PER_CPUs in modules */
 #ifdef CONFIG_MODULES
-#define PERCPU_MODULE_RESERVE		(8 << 10)
+#define PERCPU_MODULE_RESERVE		(8 << 10)	/// 8K
 #else
 #define PERCPU_MODULE_RESERVE		0
 #endif
@@ -63,7 +63,7 @@
  * intelligent way to determine this would be nice.
  */
 #if BITS_PER_LONG > 32
-#define PERCPU_DYNAMIC_RESERVE		(28 << 10)
+#define PERCPU_DYNAMIC_RESERVE		(28 << 10)	/// 28K
 #else
 #define PERCPU_DYNAMIC_RESERVE		(20 << 10)
 #endif
