@@ -2277,7 +2277,7 @@ static struct pcpu_alloc_info * __init pcpu_build_alloc_info(
 {
 	static int group_map[NR_CPUS] __initdata;
 	static int group_cnt[NR_CPUS] __initdata;
-	const size_t static_size = __per_cpu_end - __per_cpu_start;
+	const size_t static_size = __per_cpu_end - __per_cpu_start;	/// The size of statically defined per-cpu var
 	int nr_groups = 1, nr_units = 0;
 	size_t size_sum, min_unit_size, alloc_size;
 	int upa, max_upa, uninitialized_var(best_upa);	/* units_per_alloc */
@@ -2292,8 +2292,8 @@ static struct pcpu_alloc_info * __init pcpu_build_alloc_info(
 
 	/* calculate size_sum and ensure dyn_size is enough for early alloc */
 	size_sum = PFN_ALIGN(static_size + reserved_size +
-			    max_t(size_t, dyn_size, PERCPU_DYNAMIC_EARLY_SIZE));
-	dyn_size = size_sum - static_size - reserved_size;
+			    max_t(size_t, dyn_size, PERCPU_DYNAMIC_EARLY_SIZE));	/// Possible unit size
+	dyn_size = size_sum - static_size - reserved_size;	/// Composed of static size, reserved size, and dyn_size
 
 	/*
 	 * Determine min_unit_size, alloc_size and max_upa such that
@@ -2301,17 +2301,17 @@ static struct pcpu_alloc_info * __init pcpu_build_alloc_info(
 	 * which can accommodate 4k aligned segments which are equal to
 	 * or larger than min_unit_size.
 	 */
-	min_unit_size = max_t(size_t, size_sum, PCPU_MIN_UNIT_SIZE);
+	min_unit_size = max_t(size_t, size_sum, PCPU_MIN_UNIT_SIZE);	/// Each CPU needs a unit
 
 	/* determine the maximum # of units that can fit in an allocation */
 	alloc_size = roundup(min_unit_size, atom_size);
-	upa = alloc_size / min_unit_size;
-	while (alloc_size % upa || (offset_in_page(alloc_size / upa)))
+	upa = alloc_size / min_unit_size;	/// unit number
+	while (alloc_size % upa || (offset_in_page(alloc_size / upa)))	/// Unit size must be times of page size
 		upa--;
 	max_upa = upa;
 
 	/* group cpus according to their proximity */
-	for_each_possible_cpu(cpu) {
+	for_each_possible_cpu(cpu) {	/// Initialize group_map that maps cpu to group
 		group = 0;
 	next_group:
 		for_each_possible_cpu(tcpu) {
@@ -2319,7 +2319,7 @@ static struct pcpu_alloc_info * __init pcpu_build_alloc_info(
 				break;
 			if (group_map[tcpu] == group && cpu_distance_fn &&
 			    (cpu_distance_fn(cpu, tcpu) > LOCAL_DISTANCE ||
-			     cpu_distance_fn(tcpu, cpu) > LOCAL_DISTANCE)) {
+			     cpu_distance_fn(tcpu, cpu) > LOCAL_DISTANCE)) {	/// Find a new cpu group
 				group++;
 				nr_groups = max(nr_groups, group + 1);
 				goto next_group;
@@ -2341,9 +2341,9 @@ static struct pcpu_alloc_info * __init pcpu_build_alloc_info(
 		if (alloc_size % upa || (offset_in_page(alloc_size / upa)))
 			continue;
 
-		for (group = 0; group < nr_groups; group++) {
-			int this_allocs = DIV_ROUND_UP(group_cnt[group], upa);
-			allocs += this_allocs;
+		for (group = 0; group < nr_groups; group++) {	/// CPU group number
+			int this_allocs = DIV_ROUND_UP(group_cnt[group], upa);	/// RoundUp(cpu_number/upa)
+			allocs += this_allocs;	/// Each cpu needs one unit; units for one group should be allocated together. allocs is the alloc number
 			wasted += this_allocs * upa - group_cnt[group];
 		}
 
