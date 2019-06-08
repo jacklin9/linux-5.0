@@ -63,7 +63,7 @@ u32 elf_hwcap2 __read_mostly;
 
 /* all of these masks are initialized in setup_cpu_local_masks() */
 cpumask_var_t cpu_initialized_mask;
-cpumask_var_t cpu_callout_mask;
+cpumask_var_t cpu_callout_mask;	/// Set by master CPU to tell AP if it can proceed the init. AP checks this flag
 cpumask_var_t cpu_callin_mask;
 
 /* representing cpus for which sibling maps can be computed */
@@ -1534,8 +1534,8 @@ EXPORT_PER_CPU_SYMBOL(__preempt_count);
 /* May not be marked __init: used by software suspend */
 void syscall_init(void)
 {
-	wrmsr(MSR_STAR, 0, (__USER32_CS << 16) | __KERNEL_CS);
-	wrmsrl(MSR_LSTAR, (unsigned long)entry_SYSCALL_64);
+	wrmsr(MSR_STAR, 0, (__USER32_CS << 16) | __KERNEL_CS);	/// Legacy syscall entry
+	wrmsrl(MSR_LSTAR, (unsigned long)entry_SYSCALL_64);		/// Long mode syscall entry
 
 #ifdef CONFIG_IA32_EMULATION
 	wrmsrl(MSR_CSTAR, (unsigned long)entry_SYSCALL_compat);
@@ -1657,7 +1657,7 @@ static void wait_for_master_cpu(int cpu)
 	 * with AP initialization
 	 */
 	WARN_ON(cpumask_test_and_set_cpu(cpu, cpu_initialized_mask));
-	while (!cpumask_test_cpu(cpu, cpu_callout_mask))
+	while (!cpumask_test_cpu(cpu, cpu_callout_mask))	/// If the current CPU is not in cpu_callout_mask, loop
 		cpu_relax();
 #endif
 }
@@ -1724,7 +1724,7 @@ void cpu_init(void)
 #endif
 	setup_getcpu(cpu);
 
-	me = current;
+	me = current;	/// init_task
 
 	pr_debug("Initializing CPU#%d\n", cpu);
 
@@ -1745,7 +1745,7 @@ void cpu_init(void)
 
 	wrmsrl(MSR_FS_BASE, 0);
 	wrmsrl(MSR_KERNEL_GS_BASE, 0);
-	barrier();
+	barrier();	/// Mem barrier: compiler doesn't reorder instructions across it, and cpu doesn't run instructions in reorder that cross it
 
 	x86_configure_nx();
 	x2apic_setup();

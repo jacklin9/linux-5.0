@@ -192,4 +192,11 @@ Initialization Process Explained
 61. TEST: in start_kernel, call setup_log_buf to update new_log_buf_len according to cpu num if necessary, allocate new log buf, and copy the content in old buf to the new one
 62. FS: in start_kernel, call vfs_caches_init_early to init hash table in_lookup_hashtable (an array of list) as empty, init dentry_hashtable(if not numa configured; otherwise, don't initialize the hashtable here because hashtable will distribute across nodes), and init inode_hashtable(if not numa configured; otherwise, don't initialize the hashtable here because hashtable will distribute across nodes)
 =================================================================================
-63. IDT: in start_kernel, call trap_init
+63. IDT: in start_kernel, call trap_init to:
+	1. Set up per cpu entry area in fixmap and map per cpu vars  to cpu entry area fields gdt, entry_stack_page, tss, exception_stacks so that in future these vars can be accessed through cpu entry area
+	2. Initialize idt_table from def_idts
+	3. Map idt_table to fixed addr CPU_ENTRY_AREA_RO_IDT to avoid kernel addr exposure
+	4. Init the current CPU (boot or master cpu): write cr4 of this cpu to per cpu var cpu_tlbstate.cr4, set this cpu's numa node, load gdt again, load idt again, set init_task.thread.tls_array to be empty, set syscall instruction handler to be entry_SYSCALL_64, let orig_ist ist entries and tss ist entries point to regions in cpu entry area field exception_stacks
+	5. Initialze idt_table from ist_idts
+	6. Copy idt_table to debug_idt_table and update it with dbg_idts
+64. MEM MANAGE: in start_kernel, call mm_init

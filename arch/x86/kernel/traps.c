@@ -929,7 +929,7 @@ dotraplinkage void do_iret_error(struct pt_regs *regs, long error_code)
 void __init trap_init(void)
 {
 	/* Init cpu_entry_area before IST entries are set up */
-	setup_cpu_entry_areas();
+	setup_cpu_entry_areas();	/// cpu_entry_area is a percpu region that contains things needed by the CPU and early entry/exit code
 
 	idt_setup_traps();
 

@@ -28,8 +28,8 @@ EXPORT_SYMBOL(get_cpu_entry_area);
 
 void cea_set_pte(void *cea_vaddr, phys_addr_t pa, pgprot_t flags)
 {
-	unsigned long va = (unsigned long) cea_vaddr;
-	pte_t pte = pfn_pte(pa >> PAGE_SHIFT, flags);
+	unsigned long va = (unsigned long) cea_vaddr;	/// An addr in cpu entry area
+	pte_t pte = pfn_pte(pa >> PAGE_SHIFT, flags);	/// Page frame number of the physical addr. Build the pte value
 
 	/*
 	 * The cpu_entry_area is shared between the user and kernel
@@ -42,7 +42,7 @@ void cea_set_pte(void *cea_vaddr, phys_addr_t pa, pgprot_t flags)
 	    (pgprot_val(flags) & _PAGE_PRESENT))
 		pte = pte_set_flags(pte, _PAGE_GLOBAL);
 
-	set_pte_vaddr(va, pte);
+	set_pte_vaddr(va, pte);	/// Set the page mapping in init_mm
 }
 
 static void __init
@@ -83,7 +83,7 @@ static void __init setup_cpu_entry_area(int cpu)
 {
 #ifdef CONFIG_X86_64
 	/* On 64-bit systems, we use a read-only fixmap GDT and TSS. */
-	pgprot_t gdt_prot = PAGE_KERNEL_RO;
+	pgprot_t gdt_prot = PAGE_KERNEL_RO;	/// Kernel read only
 	pgprot_t tss_prot = PAGE_KERNEL_RO;
 #else
 	/*
@@ -102,11 +102,11 @@ static void __init setup_cpu_entry_area(int cpu)
 #endif
 
 	cea_set_pte(&get_cpu_entry_area(cpu)->gdt, get_cpu_gdt_paddr(cpu),
-		    gdt_prot);
+		    gdt_prot);	/// This cpu's entry area gdt. Map this cpu's gdt to the gdt pointer in this cpu's entry area
 
 	cea_map_percpu_pages(&get_cpu_entry_area(cpu)->entry_stack_page,
 			     per_cpu_ptr(&entry_stack_storage, cpu), 1,
-			     PAGE_KERNEL);
+			     PAGE_KERNEL);	/// Map this cpu's entry_stack_storage to entry_stack_page in this cpu's entry area
 
 	/*
 	 * The Intel SDM says (Volume 3, 7.2.1):
@@ -130,7 +130,7 @@ static void __init setup_cpu_entry_area(int cpu)
 	BUILD_BUG_ON(sizeof(struct tss_struct) % PAGE_SIZE != 0);
 	cea_map_percpu_pages(&get_cpu_entry_area(cpu)->tss,
 			     &per_cpu(cpu_tss_rw, cpu),
-			     sizeof(struct tss_struct) / PAGE_SIZE, tss_prot);
+			     sizeof(struct tss_struct) / PAGE_SIZE, tss_prot);	/// Map this cpu's cpu_tss_rw to tss field in this cpu's entry area
 
 #ifdef CONFIG_X86_32
 	per_cpu(cpu_entry_area, cpu) = get_cpu_entry_area(cpu);
@@ -142,7 +142,7 @@ static void __init setup_cpu_entry_area(int cpu)
 		     sizeof(((struct cpu_entry_area *)0)->exception_stacks));
 	cea_map_percpu_pages(&get_cpu_entry_area(cpu)->exception_stacks,
 			     &per_cpu(exception_stacks, cpu),
-			     sizeof(exception_stacks) / PAGE_SIZE, PAGE_KERNEL);
+			     sizeof(exception_stacks) / PAGE_SIZE, PAGE_KERNEL);	/// Map this cpu's exception_stacks to exception_stacks field in this cpu's entry area
 #endif
 	percpu_setup_debug_store(cpu);
 }
@@ -156,7 +156,7 @@ static __init void setup_cpu_entry_area_ptes(void)
 	BUG_ON(CPU_ENTRY_AREA_BASE & ~PMD_MASK);
 
 	start = CPU_ENTRY_AREA_BASE;
-	end = start + CPU_ENTRY_AREA_MAP_SIZE;
+	end = start + CPU_ENTRY_AREA_MAP_SIZE;	/// start + page size + total size. total size = sizeof(struct cpu_entry_area) * nr_cpu
 
 	/* Careful here: start + PMD_SIZE might wrap around */
 	for (; start < end && start >= CPU_ENTRY_AREA_BASE; start += PMD_SIZE)
