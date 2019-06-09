@@ -1927,8 +1927,8 @@ static unsigned long __init free_low_memory_core_early(void)
 
 	memblock_clear_hotplug(0, -1);
 
-	for_each_reserved_mem_region(i, &start, &end)
-		reserve_bootmem_region(start, end);
+	for_each_reserved_mem_region(i, &start, &end)	/// For each reserved region in memblock.reserved
+		reserve_bootmem_region(start, end);	/// Init each page in this region (set correct node, zone, and mark as reserved)
 
 	/*
 	 * We need to use NUMA_NO_NODE instead of NODE_DATA(0)->node_id
@@ -1936,8 +1936,8 @@ static unsigned long __init free_low_memory_core_early(void)
 	 *  low ram will be on Node1
 	 */
 	for_each_free_mem_range(i, NUMA_NO_NODE, MEMBLOCK_NONE, &start, &end,
-				NULL)
-		count += __free_memory_core(start, end);
+				NULL)	/// For each available mem range that is in memblock.memory but not in memblock.reserved
+		count += __free_memory_core(start, end);	/// Free the pages to buddy system
 
 	return count;
 }
@@ -1948,18 +1948,18 @@ void reset_node_managed_pages(pg_data_t *pgdat)
 {
 	struct zone *z;
 
-	for (z = pgdat->node_zones; z < pgdat->node_zones + MAX_NR_ZONES; z++)
+	for (z = pgdat->node_zones; z < pgdat->node_zones + MAX_NR_ZONES; z++)	/// Set each zone's managed_pages to be 0
 		atomic_long_set(&z->managed_pages, 0);
 }
 
 void __init reset_all_zones_managed_pages(void)
 {
-	struct pglist_data *pgdat;
+	struct pglist_data *pgdat;	/// Mem node descriptor
 
 	if (reset_managed_pages_done)
 		return;
 
-	for_each_online_pgdat(pgdat)
+	for_each_online_pgdat(pgdat)	/// For each online node
 		reset_node_managed_pages(pgdat);
 
 	reset_managed_pages_done = 1;
@@ -1974,10 +1974,10 @@ unsigned long __init memblock_free_all(void)
 {
 	unsigned long pages;
 
-	reset_all_zones_managed_pages();
+	reset_all_zones_managed_pages();	/// Set field managed_pages of each zone of each node to be 0
 
 	pages = free_low_memory_core_early();
-	totalram_pages_add(pages);
+	totalram_pages_add(pages);	/// Update _totalram_pages
 
 	return pages;
 }

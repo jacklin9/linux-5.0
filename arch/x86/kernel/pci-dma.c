@@ -63,11 +63,11 @@ void __init pci_iommu_alloc(void)
 {
 	struct iommu_table_entry *p;
 
-	sort_iommu_table(__iommu_table, __iommu_table_end);
+	sort_iommu_table(__iommu_table, __iommu_table_end);	/// IOMMU see https://www.cyberciti.biz/tips/howto-turn-on-linux-software-iommu-support.html 
 	check_iommu_entries(__iommu_table, __iommu_table_end);
 
 	for (p = __iommu_table; p < __iommu_table_end; p++) {
-		if (p && p->detect && p->detect() > 0) {
+		if (p && p->detect && p->detect() > 0) {	/// Run detect and early_init
 			p->flags |= IOMMU_DETECTED;
 			if (p->early_init)
 				p->early_init();

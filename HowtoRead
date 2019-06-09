@@ -199,4 +199,16 @@ Initialization Process Explained
 	4. Init the current CPU (boot or master cpu): write cr4 of this cpu to per cpu var cpu_tlbstate.cr4, set this cpu's numa node, load gdt again, load idt again, set init_task.thread.tls_array to be empty, set syscall instruction handler to be entry_SYSCALL_64, let orig_ist ist entries and tss ist entries point to regions in cpu entry area field exception_stacks
 	5. Initialze idt_table from ist_idts
 	6. Copy idt_table to debug_idt_table and update it with dbg_idts
-64. MEM MANAGE: in start_kernel, call mm_init
+64. MEM MANAGE: in start_kernel, call mm_init to: (support 3 mem models: flatmem, discontigmem, sparsemem, see https://www.kernel.org/doc/html/latest/vm/memory-model.html)
+	1. detect iommu in dep topology order:
+	pci_xen_swiotlb_detect
+	|
+	pci_swiotlb_detect_override
+	|
+	pci_swiotlb_detect_4gb
+	|________________________________________________________________________
+	|							  |											|
+	gart_iommu_hole_init	detect_calgary							detect_intel_iommu
+	|
+	amd_iommu_detect
+	2. Init each page's page struct according to memblock.memory and memblock.reserved, and put available pages to buddy system

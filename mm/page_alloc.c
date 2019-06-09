@@ -1217,7 +1217,7 @@ static void __meminit __init_single_page(struct page *page, unsigned long pfn,
 				unsigned long zone, int nid)
 {
 	mm_zero_struct_page(page);
-	set_page_links(page, zone, nid, pfn);
+	set_page_links(page, zone, nid, pfn);	/// Store zone and node id to page flags
 	init_page_count(page);
 	page_mapcount_reset(page);
 	page_cpupid_reset_last(page);
@@ -1243,7 +1243,7 @@ static void __meminit init_reserved_page(unsigned long pfn)
 	nid = early_pfn_to_nid(pfn);
 	pgdat = NODE_DATA(nid);
 
-	for (zid = 0; zid < MAX_NR_ZONES; zid++) {
+	for (zid = 0; zid < MAX_NR_ZONES; zid++) {	/// Find which node and zone this page is in
 		struct zone *zone = &pgdat->node_zones[zid];
 
 		if (pfn >= zone->zone_start_pfn && pfn < zone_end_pfn(zone))

@@ -517,8 +517,8 @@ static void __init mm_init(void)
 	 * bigger than MAX_ORDER unless SPARSEMEM.
 	 */
 	page_ext_init_flatmem();
-	mem_init();
-	kmem_cache_init();
+	mem_init();	/// Init page struct and buddy system
+	kmem_cache_init();	/// Init slab, slob, or slub
 	pgtable_init();
 	debug_objects_mem_init();
 	vmalloc_init();
