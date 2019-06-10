@@ -212,3 +212,4 @@ Initialization Process Explained
 	|
 	amd_iommu_detect
 	2. Init each page's page struct according to memblock.memory and memblock.reserved, and put available pages to buddy system
+	3. Init slab (or slob, or slub)
