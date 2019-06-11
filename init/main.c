@@ -519,7 +519,7 @@ static void __init mm_init(void)
 	page_ext_init_flatmem();
 	mem_init();	/// Init page struct and buddy system
 	kmem_cache_init();	/// Init slab, slob, or slub
-	pgtable_init();
+	pgtable_init();	/// Init ptl lock cache and page table cache
 	debug_objects_mem_init();
 	vmalloc_init();
 	ioremap_huge_init();

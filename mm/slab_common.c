@@ -276,7 +276,7 @@ static unsigned int calculate_alignment(slab_flags_t flags,
 		unsigned int ralign;
 
 		ralign = cache_line_size();
-		while (size <= ralign / 2)
+		while (size <= ralign / 2)	/// We cannot waste 50% or above
 			ralign /= 2;
 		align = max(align, ralign);
 	}
@@ -968,7 +968,7 @@ void __init create_boot_cache(struct kmem_cache *s, const char *name,
 	int err;
 
 	s->name = name;
-	s->size = s->object_size = size;
+	s->size = s->object_size = size;	/// size is the size of kmem_cache
 	s->align = calculate_alignment(flags, ARCH_KMALLOC_MINALIGN, size);
 	s->useroffset = useroffset;
 	s->usersize = usersize;
