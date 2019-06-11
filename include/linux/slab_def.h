@@ -8,7 +8,7 @@
  * Definitions unique to the original Linux SLAB allocator.
  */
 
-struct kmem_cache {
+struct kmem_cache {	/// This is for SLAB algorithm. A struct that represents cache for an object type
 	struct array_cache __percpu *cpu_cache;
 
 /* 1) Cache tunables. Protected by slab_mutex */
@@ -36,7 +36,7 @@ struct kmem_cache {
 	unsigned int freelist_size;
 
 	/* constructor func */
-	void (*ctor)(void *obj);
+	void (*ctor)(void *obj);	/// Constructor of the object type
 
 /* 4) cache creation/removal */
 	const char *name;
@@ -89,7 +89,7 @@ struct kmem_cache {
 	unsigned int useroffset;	/* Usercopy region offset */
 	unsigned int usersize;		/* Usercopy region size */
 
-	struct kmem_cache_node *node[MAX_NUMNODES];
+	struct kmem_cache_node *node[MAX_NUMNODES];	/// There is a struct (3 slab lists) for each node
 };
 
 static inline void *nearest_obj(struct kmem_cache *cache, struct page *page,

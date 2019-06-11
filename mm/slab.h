@@ -17,7 +17,7 @@
  * separate allocations in the kmem_cache structure of SLAB and
  * SLUB is no longer needed.
  */
-struct kmem_cache {
+struct kmem_cache {	/// This is for SLOB implementation
 	unsigned int object_size;/* The original size of the object */
 	unsigned int size;	/* The aligned/padded/added on size  */
 	unsigned int align;	/* Alignment as calculated */

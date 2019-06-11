@@ -1220,24 +1220,24 @@ static void __init set_up_node(struct kmem_cache *cachep, int index)
  * Initialisation.  Called after the page allocator have been initialised and
  * before smp_init().
  */
-void __init kmem_cache_init(void)
+void __init kmem_cache_init(void)	/// Bootstrap slab system
 {
 	int i;
 
-	kmem_cache = &kmem_cache_boot;
+	kmem_cache = &kmem_cache_boot;	/// kmem_cache will be put to list whose head is slab_caches
 
 	if (!IS_ENABLED(CONFIG_NUMA) || num_possible_nodes() == 1)
 		use_alien_caches = 0;
 
 	for (i = 0; i < NUM_INIT_LISTS; i++)
-		kmem_cache_node_init(&init_kmem_cache_node[i]);
+		kmem_cache_node_init(&init_kmem_cache_node[i]);	/// Init the node's cache slab as empty
 
 	/*
 	 * Fragmentation resistance on low memory - only use bigger
 	 * page orders on machines with more than 32MB of memory if
 	 * not overridden on the command line.
 	 */
-	if (!slab_max_order_set && totalram_pages() > (32 << 20) >> PAGE_SHIFT)
+	if (!slab_max_order_set && totalram_pages() > (32 << 20) >> PAGE_SHIFT)	/// If slab_max_order is not set and total ram is larger than 32M
 		slab_max_order = SLAB_MAX_ORDER_HI;
 
 	/* Bootstrap is tricky, because several objects are allocated
@@ -1265,9 +1265,9 @@ void __init kmem_cache_init(void)
 	/*
 	 * struct kmem_cache size depends on nr_node_ids & nr_cpu_ids
 	 */
-	create_boot_cache(kmem_cache, "kmem_cache",
-		offsetof(struct kmem_cache, node) +
-				  nr_node_ids * sizeof(struct kmem_cache_node *),
+	create_boot_cache(kmem_cache, "kmem_cache",		/// kmem_cache now points to kmem_cache_boot
+		offsetof(struct kmem_cache, node) +	
+				  nr_node_ids * sizeof(struct kmem_cache_node *), /// Size of the kmem_cache. Why not use sizeof: because nr_node_ids is dynamic
 				  SLAB_HWCACHE_ALIGN, 0, 0);
 	list_add(&kmem_cache->list, &slab_caches);
 	memcg_link_cache(kmem_cache);
