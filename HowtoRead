@@ -191,7 +191,6 @@ Initialization Process Explained
 60. MEM MANAGE: in start_kernel, call build_all_zonelists to find each node's fallback nodes, add zone list of each fallback node to this node's fallback zone list, and add this node's zone list to this node's nofallback zone list
 61. TEST: in start_kernel, call setup_log_buf to update new_log_buf_len according to cpu num if necessary, allocate new log buf, and copy the content in old buf to the new one
 62. FS: in start_kernel, call vfs_caches_init_early to init hash table in_lookup_hashtable (an array of list) as empty, init dentry_hashtable(if not numa configured; otherwise, don't initialize the hashtable here because hashtable will distribute across nodes), and init inode_hashtable(if not numa configured; otherwise, don't initialize the hashtable here because hashtable will distribute across nodes)
-=================================================================================
 63. IDT: in start_kernel, call trap_init to:
 	1. Set up per cpu entry area in fixmap and map per cpu vars  to cpu entry area fields gdt, entry_stack_page, tss, exception_stacks so that in future these vars can be accessed through cpu entry area
 	2. Initialize idt_table from def_idts
@@ -211,5 +210,7 @@ Initialization Process Explained
 	gart_iommu_hole_init	detect_calgary							detect_intel_iommu
 	|
 	amd_iommu_detect
-	2. Init each page's page struct according to memblock.memory and memblock.reserved, and put available pages to buddy system
-	3. Init slab (or slob, or slub)
+	2. Init each page's page struct according to memblock.memory and memblock.reserved, and put available pages to buddy system (mem_init)
+	3. Init slab (or slob, or slub) (kmem_cache_init)
+65. PROC: in start_kernel, call sched_init to init sched entity pointer array root_task_group.se and entity pointer array root_task_group.cfs_rq for completely fair scheduling, and init sched entity pointer array root_task_group.rt_se and entity pointer array root_task_group.rt_rq for realtime scheduling. Also add root_task_group to list task_groups with linking field root_task_group.list. For each cpu init its runqueue in per-cpu var runqueues. Take current proc (currently it is init_task) as idle proc for current cpu (boot cpu), init some fields of the proc's task struct, and set it running (runable)
+=================================================================================

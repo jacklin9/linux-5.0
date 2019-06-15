@@ -4,7 +4,7 @@
 #include "sched.h"
 
 #define WAIT_TABLE_BITS 8
-#define WAIT_TABLE_SIZE (1 << WAIT_TABLE_BITS)
+#define WAIT_TABLE_SIZE (1 << WAIT_TABLE_BITS)	/// 256
 
 static wait_queue_head_t bit_wait_table[WAIT_TABLE_SIZE] __cacheline_aligned;
 

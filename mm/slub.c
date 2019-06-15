@@ -4239,7 +4239,7 @@ void __init kmem_cache_init(void)
 	kmem_cache = &boot_kmem_cache;
 
 	create_boot_cache(kmem_cache_node, "kmem_cache_node",
-		sizeof(struct kmem_cache_node), SLAB_HWCACHE_ALIGN, 0, 0);
+		sizeof(struct kmem_cache_node), SLAB_HWCACHE_ALIGN, 0, 0);	/// Manually create the boot cache for kmem_cache
 
 	register_hotmemory_notifier(&slab_memory_callback_nb);
 
