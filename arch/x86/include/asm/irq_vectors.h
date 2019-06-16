@@ -48,7 +48,7 @@
  * Vectors 0x30-0x3f are used for ISA interrupts.
  *   round up to the next 16-vector boundary
  */
-#define ISA_IRQ_VECTOR(irq)		(((FIRST_EXTERNAL_VECTOR + 16) & ~15) + irq)
+#define ISA_IRQ_VECTOR(irq)		(((FIRST_EXTERNAL_VECTOR + 16) & ~15) + irq)	/// Next 16 aligned of FIRST_EXTERNAL_VECTOR
 
 /*
  * Special IRQ vectors used by the SMP architecture, 0xf0-0xff
@@ -127,8 +127,8 @@
 
 #define NR_IRQS_LEGACY			16
 
-#define CPU_VECTOR_LIMIT		(64 * NR_CPUS)
-#define IO_APIC_VECTOR_LIMIT		(32 * MAX_IO_APICS)
+#define CPU_VECTOR_LIMIT		(64 * NR_CPUS)	/// Each CPU can send out 64 interrupts
+#define IO_APIC_VECTOR_LIMIT		(32 * MAX_IO_APICS)	/// Each IO APIC can send out 32 interrupts
 
 #if defined(CONFIG_X86_IO_APIC) && defined(CONFIG_PCI_MSI)
 #define NR_IRQS						\
