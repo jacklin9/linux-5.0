@@ -526,7 +526,7 @@ static void __init mm_init(void)
 	/* Should be run before the first non-init thread is created */
 	init_espfix_bsp();
 	/* Should be run after espfix64 is set up. */
-	pti_init();
+	pti_init();	/// Page Table Isolation
 }
 
 void __init __weak arch_call_rest_init(void)

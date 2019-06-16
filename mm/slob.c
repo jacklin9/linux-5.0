@@ -107,12 +107,12 @@ static LIST_HEAD(free_slob_large);
  */
 static inline int slob_page_free(struct page *sp)
 {
-	return PageSlobFree(sp);
+	return PageSlobFree(sp);	/// Define by __PAGEFLAG(SlobFree, slob_free, PF_NO_TAIL): Check struct page flags PG_slob_free
 }
 
 static void set_slob_page_free(struct page *sp, struct list_head *list)
 {
-	list_add(&sp->lru, list);
+	list_add(&sp->lru, list);	/// Link this page to linked list list with field lru
 	__SetPageSlobFree(sp);
 }
 
@@ -653,7 +653,7 @@ struct kmem_cache kmem_cache_boot = {
 
 void __init kmem_cache_init(void)
 {
-	kmem_cache = &kmem_cache_boot;
+	kmem_cache = &kmem_cache_boot;	/// A cache for struct kmem_cache
 	slab_state = UP;
 }
 

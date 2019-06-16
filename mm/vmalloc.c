@@ -1257,7 +1257,7 @@ void __init vmalloc_init(void)
 	}
 
 	/* Import existing vmlist entries. */
-	for (tmp = vmlist; tmp; tmp = tmp->next) {
+	for (tmp = vmlist; tmp; tmp = tmp->next) {	/// vmlist is a list of vm_struct
 		va = kzalloc(sizeof(struct vmap_area), GFP_NOWAIT);
 		va->flags = VM_VM_AREA;
 		va->va_start = (unsigned long)tmp->addr;
