@@ -68,9 +68,9 @@ void __init init_ISA_irqs(void)
 	 * On some 32-bit UP machines, whose APIC has been disabled by BIOS
 	 * and then got re-enabled by "lapic", it hangs at boot time without this.
 	 */
-	init_bsp_APIC();
+	init_bsp_APIC();	/// If the computer is one-cpu system and it has APIC, then disable local APIC and set IO APIC to simulate legacy PIC
 
-	legacy_pic->init(0);
+	legacy_pic->init(0);	/// The argument indicates if the PIC should enable auto EOI (end of interrupt)
 
 	for (i = 0; i < nr_legacy_irqs(); i++)
 		irq_set_chip_and_handler(i, chip, handle_level_irq);

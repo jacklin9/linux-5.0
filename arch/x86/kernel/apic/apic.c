@@ -1307,18 +1307,18 @@ void __init init_bsp_APIC(void)
 	 * Don't do the setup now if we have a SMP BIOS as the
 	 * through-I/O-APIC virtual wire mode might be active.
 	 */
-	if (smp_found_config || !boot_cpu_has(X86_FEATURE_APIC))
-		return;
+	if (smp_found_config || !boot_cpu_has(X86_FEATURE_APIC))	/// If SMP is found or the cpu has no APIC
+		return;	/// Only enable virtual wire mode if it is a one-cpu computer and cpu has APIC
 
 	/*
 	 * Do not trust the local APIC being empty at bootup.
-	 */
-	clear_local_APIC();
+	 */	
+	clear_local_APIC();	/// Disable local APIC
 
 	/*
 	 * Enable APIC.
 	 */
-	value = apic_read(APIC_SPIV);
+	value = apic_read(APIC_SPIV);	/// Read an APIC register
 	value &= ~APIC_VECTOR_MASK;
 	value |= APIC_SPIV_APIC_ENABLED;
 

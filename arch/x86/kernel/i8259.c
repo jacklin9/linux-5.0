@@ -370,8 +370,8 @@ static void init_8259A(int auto_eoi)
 
 	udelay(100);		/* wait for 8259A to initialize */
 
-	outb(cached_master_mask, PIC_MASTER_IMR); /* restore master IRQ mask */
-	outb(cached_slave_mask, PIC_SLAVE_IMR);	  /* restore slave IRQ mask */
+	outb(cached_master_mask, PIC_MASTER_IMR); /* restore master IRQ mask */	/// Initially all interrupts are disabled
+	outb(cached_slave_mask, PIC_SLAVE_IMR);	  /* restore slave IRQ mask */	/// Initially all interrupts are disabled
 
 	raw_spin_unlock_irqrestore(&i8259A_lock, flags);
 }
